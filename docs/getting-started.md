@@ -1,0 +1,72 @@
+# Getting Started
+
+PixelCI is a self-hosted visual regression testing platform. It compares screenshots from your CI/CD pipeline against approved baselines and flags visual changes for review.
+
+## How It Works
+
+1. **Upload Screenshots** — your CI pipeline uploads screenshots after each build
+2. **Automatic Comparison** — PixelCI compares them against approved baselines
+3. **Smart Analysis** — matches against previously approved changes across branches
+4. **Review & Approve** — team members review changes in the web UI
+5. **Build Status** — CI passes if all changes are approved, fails if review is needed
+
+## Quick Start
+
+### 1. Deploy PixelCI
+
+Run the server with Docker:
+
+```bash
+docker run -d \
+  --name pixelci \
+  -p 7924:7924 \
+  -e APP_ENV=production \
+  -e ENABLE_JOB_RUNNER=true \
+  -e AUTH_JWT_SECRET=your-secret-key \
+  -e REDIS_HOST=redis \
+  -e REDIS_PREFIX=pixelci \
+  -e MYSQL_HOST=mysql \
+  -e MYSQL_USER=root \
+  -e MYSQL_PASSWORD_SECRET=your-password \
+  -e MYSQL_DATABASE=pixelci \
+  -e S3_ENDPOINT=https://s3.amazonaws.com \
+  -e S3_REGION=us-east-1 \
+  -e S3_ACCESS_KEY_ID=your-access-key \
+  -e S3_ACCESS_SECRET=your-secret-key \
+  -e S3_BUCKET=pixelci \
+  ghcr.io/zyno-io/pixelci:latest
+```
+
+Then run migrations:
+
+```bash
+docker exec pixelci node . migration:run
+```
+
+See the [Deployment Guide](./deployment.md) for Docker Compose, Kubernetes, and full configuration reference.
+
+### 2. Set Up Authentication
+
+PixelCI uses GitLab OAuth for authentication. See the [GitLab Setup Guide](./gitlab-setup.md) to configure OAuth and create your first app.
+
+### 3. Add to Your CI Pipeline
+
+```yaml
+visual-regression:
+    stage: test
+    image: ghcr.io/zyno-io/pixelci/cli:latest
+    variables:
+        PIXELCI_API_URL: https://pixelci.example.com
+    script:
+        - pixelci ./screenshots
+```
+
+See the [GitLab Setup Guide](./gitlab-setup.md#part-2-ci-pipeline-integration) for detailed CI configuration.
+
+### 4. Review Results
+
+Open the PixelCI web UI to review builds, compare screenshots, and approve changes. See the [Usage Guide](./usage.md) for a walkthrough.
+
+## License
+
+PixelCI is **source-available** under the PixelCI Source Available License. It is free for internal use within your organization. A [commercial license](mailto:support@sgnl24.com) is required to offer it as a hosted service, distribute it, or embed it in products sold to others.

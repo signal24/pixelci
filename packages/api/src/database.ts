@@ -1,0 +1,21 @@
+import { createMySQLDatabase, MySQLDatabaseSession } from '@zyno-io/dk-server-foundation';
+
+import { AppEntity } from './entities/App.entity';
+import { BranchEntity } from './entities/Branch.entity';
+import { BuildEntity } from './entities/Build.entity';
+import { BuildScreenEntity } from './entities/BuildScreen.entity';
+import { ScreenEntity } from './entities/Screen.entity';
+import { UserEntity } from './entities/User.entity';
+import { VcsIntegrationEntity } from './entities/VcsIntegration.entity';
+
+export class DB extends createMySQLDatabase({}, [
+    AppEntity,
+    BranchEntity,
+    BuildEntity,
+    BuildScreenEntity,
+    ScreenEntity,
+    UserEntity,
+    VcsIntegrationEntity
+]) {}
+
+export type DBSession = MySQLDatabaseSession;

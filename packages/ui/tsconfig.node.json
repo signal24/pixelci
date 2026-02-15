@@ -1,0 +1,13 @@
+{
+    "extends": "@tsconfig/node22/tsconfig.json",
+    "include": ["vite.config.*", "vitest.config.*", "cypress.config.*", "playwright.config.*"],
+    "compilerOptions": {
+        "composite": true,
+        "types": ["node"],
+        "paths": {
+            "@zyno-io/vue-foundation/vite-plugins": [
+                "./node_modules/@zyno-io/vue-foundation/dist/src/vite-plugins/index.d.ts"
+            ]
+        }
+    }
+}

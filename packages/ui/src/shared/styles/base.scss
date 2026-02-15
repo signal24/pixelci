@@ -1,0 +1,187 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Geist:wght@100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
+* {
+    @apply box-border;
+    font-family: 'Inter', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+    @apply h-full;
+}
+
+body {
+    @apply m-0 h-full flex overflow-hidden min-h-0;
+}
+
+main {
+    @apply overflow-y-auto pb-8;
+
+    > div {
+        @apply mx-auto;
+    }
+}
+
+main > div {
+    @apply flex-1 flex flex-col w-full px-12;
+
+    &:not(.full) {
+        @apply max-w-screen-lg px-3;
+    }
+}
+
+h1 {
+    @apply text-xl font-medium my-2;
+}
+
+.input-wrapper {
+    @apply flex flex-col gap-2;
+}
+
+.field {
+    @apply flex flex-col gap-2;
+
+    label {
+        @apply text-base;
+    }
+
+    .field-value {
+        @apply flex-1;
+    }
+}
+
+label:has(input[type='checkbox']) {
+    @apply cursor-pointer flex items-center gap-2 select-none;
+}
+
+input[type='checkbox'] {
+    @apply appearance-none m-0;
+}
+
+input[type='checkbox']:after {
+    @apply content-[''] outline outline-neutral-800 w-[12px] h-[12px] block duration-75 rounded-sm;
+}
+
+input[type='checkbox']:checked:after {
+    @apply outline-offset-2 bg-neutral-800;
+}
+
+input:not([type='checkbox']),
+select {
+    @apply px-3 py-2 rounded-md border;
+
+    ::placeholder {
+        @apply text-red-500;
+    }
+
+    &:focus {
+        @apply outline-none;
+    }
+}
+
+button {
+    @apply px-3 py-2 rounded-md font-medium border cursor-pointer;
+
+    &:hover {
+        @apply bg-neutral-500/10;
+    }
+
+    &.primary {
+        @apply bg-black text-white;
+        &:hover {
+            @apply bg-neutral-800;
+        }
+    }
+
+    &.danger {
+        @apply text-red-500 border-red-500/50;
+        &:hover {
+            @apply bg-red-500/10;
+        }
+    }
+}
+
+.header {
+    @apply sticky top-0 z-10 flex items-center justify-between py-3 mb-2 bg-white;
+}
+
+.vf-modal {
+    @apply min-w-[300px] rounded-lg border p-4 gap-4 bg-neutral-100;
+
+    .vf-modal-footer {
+        @apply flex justify-end gap-2;
+    }
+}
+
+.vf-tooltip {
+    @apply bg-white py-1 px-2 shadow-md border border-neutral-500/50 rounded-md;
+}
+
+.vf-toast {
+    @apply pointer-events-auto;
+    z-index: 200;
+
+    .content {
+        @apply bg-neutral-800 text-white text-sm px-4 py-2.5 rounded-lg shadow-lg gap-3;
+
+        .close {
+            @apply text-neutral-400 hover:text-white cursor-pointer text-xs leading-none;
+        }
+    }
+
+    .progress-bar {
+        @apply hidden;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    html {
+        @apply bg-black text-white;
+    }
+
+    .header {
+        @apply bg-black;
+    }
+
+    input[type='checkbox']:after {
+        @apply outline-white;
+    }
+
+    input[type='checkbox']:checked:after {
+        @apply bg-white;
+    }
+
+    input,
+    select {
+        @apply bg-neutral-900 border-neutral-500/25;
+    }
+
+    button {
+        @apply border border-neutral-500/25;
+
+        &.primary {
+            @apply bg-white text-black;
+            &:hover {
+                @apply bg-neutral-200;
+            }
+        }
+    }
+
+    .vf-modal {
+        @apply bg-neutral-950 border border-neutral-500/25;
+    }
+
+    .vf-tooltip {
+        @apply bg-black py-1 px-2 shadow-md border border-neutral-500/50 rounded-md;
+    }
+
+    .vf-toast .content {
+        @apply bg-neutral-200 text-black;
+
+        .close {
+            @apply text-neutral-500 hover:text-black;
+        }
+    }
+}

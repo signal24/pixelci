@@ -1,0 +1,33 @@
+FROM node:24-alpine AS builder
+
+WORKDIR /app
+
+COPY .yarn .yarn
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY packages/api/package.json packages/api/package.json
+COPY packages/ui/package.json packages/ui/package.json
+COPY packages/cli/package.json packages/cli/package.json
+
+RUN yarn workspaces focus @zyno-io/pixelci-cli
+
+COPY packages/cli packages/cli
+
+RUN cd packages/cli && \
+    npx tsc
+
+FROM node:24-alpine
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY --from=builder /app/packages/cli .
+COPY --from=builder /app/node_modules node_modules
+COPY LICENSE.md THIRD-PARTY-LICENSES.md ./
+
+RUN printf '#!/bin/sh\nexec node /app/dist/index.js "$@"\n' > /usr/bin/pixelci && \
+    chmod +x /usr/bin/pixelci
+
+ARG BUILD_VERSION=0.0.0
+RUN npm version ${BUILD_VERSION} --allow-same-version
+
+CMD ["pixelci"]

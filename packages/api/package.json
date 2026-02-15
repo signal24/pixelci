@@ -1,0 +1,51 @@
+{
+    "name": "@zyno-io/pixelci-api",
+    "private": true,
+    "version": "0.1.0",
+    "description": "",
+    "main": "./dist/src/index.js",
+    "scripts": {
+        "build": "dksf-dev build",
+        "dev": "dksf-dev run",
+        "migrate": "dksf-dev migrate",
+        "test": "dksf-dev test",
+        "test:debug": "dksf-dev test --debug",
+        "test:all": "yarn build && yarn test && yarn test:int",
+        "test:int": "APP_ENV=development node -r ts-node/register --inspect=9228 tests/integration/index.ts",
+        "test:int:auth": "APP_ENV=development node -r ts-node/register tests/integration/ci-token-auth.test.ts",
+        "test:int:onboarding": "APP_ENV=development node -r ts-node/register tests/integration/onboarding.test.ts",
+        "format": "npx oxlint --fix --fix-suggestions --fix-dangerously && prettier --ignore-path ../../.prettierignore --write ."
+    },
+    "dependencies": {
+        "@aws-sdk/client-s3": "^3.990.0",
+        "@aws-sdk/s3-request-presigner": "^3.990.0",
+        "@deepkit/app": "1.0.19",
+        "@deepkit/framework": "1.0.19",
+        "@deepkit/http": "1.0.19",
+        "@deepkit/logger": "1.0.19",
+        "@deepkit/orm": "1.0.19",
+        "@deepkit/sql": "1.0.19",
+        "@deepkit/template": "1.0.19",
+        "@deepkit/type": "1.0.19",
+        "@deepkit/type-compiler": "1.0.19",
+        "@types/lodash": "^4.17.23",
+        "@zyno-io/dk-server-foundation": "26.216.436",
+        "axios": "^1.13.5",
+        "date-fns": "^4.1.0",
+        "date-fns-tz": "^3.2.0",
+        "lodash": "^4.17.23",
+        "pixelmatch": "^7.1.0",
+        "pngjs": "^7.0.0"
+    },
+    "devDependencies": {
+        "@faker-js/faker": "^10.3.0",
+        "@types/mime-types": "^3.0.1",
+        "@types/node": "^25.2.3",
+        "@types/pngjs": "^6.0.5",
+        "ts-node": "^10.9.2",
+        "typescript": "~5.9"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "UNLICENSED"
+}

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- 2x2 pixel grid -->
+  <rect x="9" y="9" width="6" height="6" rx="1" fill="#3b82f6"/>
+  <rect x="17" y="9" width="6" height="6" rx="1" fill="#93c5fd"/>
+  <rect x="9" y="17" width="6" height="6" rx="1" fill="#93c5fd"/>
+  <rect x="17" y="17" width="6" height="6" rx="1" fill="#ef4444"/>
+  <!-- CI cycle arrow (270° clockwise arc from top to left) -->
+  <path d="M 16 2.5 A 13.5 13.5 0 1 1 2.5 16" stroke="#64748b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Arrowhead -->
+  <polygon points="2.5,20 -0.5,14.5 5.5,14.5" fill="#64748b"/>
+</svg>

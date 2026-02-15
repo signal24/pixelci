@@ -1,0 +1,19 @@
+{
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.oxc": "explicit",
+        "source.organizeImports": "explicit"
+    },
+    "prettier.configPath": ".prettierrc.json",
+    "oxc.configPath": ".oxlintrc.json",
+    "oxc.enable": true,
+    "search.exclude": {
+        "**/dist/**": true,
+        "packages/ui/src/openapi-client-generated": true,
+        "packages/api/static/assets": true,
+        "docs/.vitepress/dist": true,
+        "docs/.vitepress/cache": true,
+        "packages/ui/playwright-report": true
+    }
+}
