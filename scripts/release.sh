@@ -18,8 +18,9 @@ if [ "$BRANCH" != "main" ]; then
     exit 1
 fi
 
-if [ -n "$(git status --porcelain)" ]; then
-    echo "Error: working tree is not clean"
+DIRTY_FILES=$(git status --porcelain | grep -v ' CHANGELOG.md$' | grep -v ' scripts/release.sh$' || true)
+if [ -n "$DIRTY_FILES" ]; then
+    echo "Error: working tree is not clean (changes beyond CHANGELOG.md, scripts/release.sh)"
     exit 1
 fi
 
@@ -50,7 +51,7 @@ for pkg in package.json packages/*/package.json; do
 done
 
 # Commit, tag, push
-git add package.json packages/*/package.json
+git add package.json packages/*/package.json CHANGELOG.md scripts/release.sh
 git commit -m "$TAG"
 git tag "$TAG"
 git push origin main "$TAG"
