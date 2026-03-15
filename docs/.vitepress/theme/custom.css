@@ -1,15 +1,15 @@
 .light-only {
-  display: block;
+    display: block;
 }
 
 .dark-only {
-  display: none;
+    display: none;
 }
 
 .dark .light-only {
-  display: none;
+    display: none;
 }
 
 .dark .dark-only {
-  display: block;
+    display: block;
 }

@@ -1,8 +1,0 @@
-.helm
-.secrets
-.yarn/
-dist/
-static/
-openapi.yaml
-openapi-specs/
-src/openapi-client-generated/

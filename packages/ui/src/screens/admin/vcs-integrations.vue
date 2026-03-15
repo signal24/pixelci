@@ -77,11 +77,12 @@
 </template>
 
 <script lang="ts" setup>
-import { VcsIntegrationsApi, type IVcsIntegrationListResponse } from '@/openapi-client-generated';
-import LoaderModal from '@/shared/components/loader-modal.vue';
 import { dataFrom, dataFromAsync } from '@zyno-io/openapi-client-codegen';
 import { handleErrorAndAlert, showConfirm, VfModal } from '@zyno-io/vue-foundation';
 import { computed, onMounted, reactive, ref } from 'vue';
+
+import { VcsIntegrationsApi, type IVcsIntegrationListResponse } from '@/openapi-client-generated';
+import LoaderModal from '@/shared/components/loader-modal.vue';
 
 const integrations = ref<IVcsIntegrationListResponse[]>();
 const isLoading = ref(true);

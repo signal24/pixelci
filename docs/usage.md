@@ -77,12 +77,12 @@ draft → processing → no changes
                    → changes approved (auto-approved)
 ```
 
-| Status | Description |
-|--------|-------------|
-| **draft** | Build created, screenshots being uploaded |
-| **processing** | Comparing screenshots against baselines |
-| **no changes** | All screenshots match — nothing to review |
-| **needs review** | Visual differences found — human review required |
+| Status               | Description                                                  |
+| -------------------- | ------------------------------------------------------------ |
+| **draft**            | Build created, screenshots being uploaded                    |
+| **processing**       | Comparing screenshots against baselines                      |
+| **no changes**       | All screenshots match — nothing to review                    |
+| **needs review**     | Visual differences found — human review required             |
 | **changes approved** | All changes approved (manually or via cross-branch matching) |
 
 ## How Comparisons Work

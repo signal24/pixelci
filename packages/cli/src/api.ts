@@ -1,5 +1,6 @@
 import { assert, ReceiveType } from '@deepkit/type';
 import { openAsBlob } from 'fs';
+
 import { ICIJobInfo } from './ci.js';
 import { AppError } from './error.js';
 
@@ -32,12 +33,7 @@ export class PixelCiApi {
         this.projectUrl = jobInfo.projectUrl;
     }
 
-    private async sendApiRequest<T>(
-        method: string,
-        path: string,
-        body?: Record<string, unknown> | FormData,
-        type?: ReceiveType<T>
-    ): Promise<T> {
+    private async sendApiRequest<T>(method: string, path: string, body?: Record<string, unknown> | FormData, type?: ReceiveType<T>): Promise<T> {
         const isJsonBody = body && !(body instanceof FormData);
         const response = await fetch(`${this.serverUrl}/api/${path}`, {
             method,
@@ -64,11 +60,9 @@ export class PixelCiApi {
     }
 
     async createBuild(): Promise<{ buildId: string; status: IBuildStatus }> {
-        const response = await this.sendApiRequest<{ id: string; status: IBuildStatus }>(
-            'POST',
-            `apps/${this.appId}/builds`,
-            { projectUrl: this.projectUrl }
-        );
+        const response = await this.sendApiRequest<{ id: string; status: IBuildStatus }>('POST', `apps/${this.appId}/builds`, {
+            projectUrl: this.projectUrl
+        });
 
         return {
             buildId: response.id,
@@ -88,10 +82,7 @@ export class PixelCiApi {
     }
 
     async getBuildStatus(buildId: string): Promise<IBuildStatus> {
-        const response = await this.sendApiRequest<{ status: IBuildStatus }>(
-            'GET',
-            `apps/${this.appId}/builds/${buildId}/status`
-        );
+        const response = await this.sendApiRequest<{ status: IBuildStatus }>('GET', `apps/${this.appId}/builds/${buildId}/status`);
         return response.status;
     }
 }

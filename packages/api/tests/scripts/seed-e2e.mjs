@@ -1,8 +1,8 @@
 import { S3Client, PutObjectCommand, CreateBucketCommand } from '@aws-sdk/client-s3';
 import fs from 'fs';
+import mariadb from 'mariadb';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import mariadb from 'mariadb';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixturesDir = path.join(__dirname, '..', 'integration', 'fixtures');
@@ -63,12 +63,7 @@ async function seedDatabase() {
     await conn.query(
         `INSERT IGNORE INTO vcsIntegrations (id, name, platform, config)
          VALUES (?, ?, ?, ?)`,
-        [
-            ZERO_ID,
-            'Test VCS',
-            'gitlab',
-            JSON.stringify({ url: 'https://git.example', clientId: 'client-id', clientSecret: 'client-secret' })
-        ]
+        [ZERO_ID, 'Test VCS', 'gitlab', JSON.stringify({ url: 'https://git.example', clientId: 'client-id', clientSecret: 'client-secret' })]
     );
 
     // User
@@ -98,26 +93,10 @@ async function seedDatabase() {
     );
 
     // Screens
-    await conn.query(`INSERT IGNORE INTO screens (id, appId, name) VALUES (?, ?, ?)`, [
-        SCREEN_HOMEPAGE_ID,
-        APP_ID,
-        'Homepage'
-    ]);
-    await conn.query(`INSERT IGNORE INTO screens (id, appId, name) VALUES (?, ?, ?)`, [
-        SCREEN_DASHBOARD_ID,
-        APP_ID,
-        'Dashboard'
-    ]);
-    await conn.query(`INSERT IGNORE INTO screens (id, appId, name) VALUES (?, ?, ?)`, [
-        SCREEN_SETTINGS_ID,
-        APP_ID,
-        'Settings'
-    ]);
-    await conn.query(`INSERT IGNORE INTO screens (id, appId, name) VALUES (?, ?, ?)`, [
-        SCREEN_LOGIN_ID,
-        APP_ID,
-        'Login'
-    ]);
+    await conn.query(`INSERT IGNORE INTO screens (id, appId, name) VALUES (?, ?, ?)`, [SCREEN_HOMEPAGE_ID, APP_ID, 'Homepage']);
+    await conn.query(`INSERT IGNORE INTO screens (id, appId, name) VALUES (?, ?, ?)`, [SCREEN_DASHBOARD_ID, APP_ID, 'Dashboard']);
+    await conn.query(`INSERT IGNORE INTO screens (id, appId, name) VALUES (?, ?, ?)`, [SCREEN_SETTINGS_ID, APP_ID, 'Settings']);
+    await conn.query(`INSERT IGNORE INTO screens (id, appId, name) VALUES (?, ?, ?)`, [SCREEN_LOGIN_ID, APP_ID, 'Login']);
 
     // ── Build 003: main, "changes approved", Jan 10 ──
     // First build, just Homepage
@@ -347,9 +326,7 @@ async function seedS3() {
     ];
 
     await Promise.all(
-        uploads.map(({ key, body }) =>
-            s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: body, ContentType: 'image/png' }))
-        )
+        uploads.map(({ key, body }) => s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: body, ContentType: 'image/png' })))
     );
 
     console.log('S3 seeded with test images.');

@@ -66,12 +66,7 @@
                             @input="onProjectSearchInput"
                         />
                         <div v-if="projectResults.length" class="project-results">
-                            <div
-                                v-for="project in projectResults"
-                                :key="project.id"
-                                class="project-result"
-                                @click="selectProject(project)"
-                            >
+                            <div v-for="project in projectResults" :key="project.id" class="project-result" @click="selectProject(project)">
                                 <span class="project-name">{{ project.name }}</span>
                                 <span class="project-path">{{ project.projectPath }}</span>
                             </div>
@@ -161,6 +156,12 @@
 </template>
 
 <script lang="ts" setup>
+import { dataFrom, dataFromAsync } from '@zyno-io/openapi-client-codegen';
+import { handleErrorAndAlert, showConfirm, showToast, VfModal } from '@zyno-io/vue-foundation';
+import { debounce } from 'lodash';
+import { computed, onMounted, reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
+
 import {
     AppsApi,
     BranchesApi,
@@ -173,11 +174,6 @@ import {
 } from '@/openapi-client-generated';
 import LoaderModal from '@/shared/components/loader-modal.vue';
 import { useStore } from '@/store';
-import { dataFrom, dataFromAsync } from '@zyno-io/openapi-client-codegen';
-import { handleErrorAndAlert, showConfirm, showToast, VfModal } from '@zyno-io/vue-foundation';
-import { debounce } from 'lodash';
-import { computed, onMounted, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
 
 const store = useStore();
 const router = useRouter();

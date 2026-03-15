@@ -1,5 +1,6 @@
-import { describe, it, beforeEach, after } from 'node:test';
 import assert from 'node:assert/strict';
+import { describe, it, beforeEach, after } from 'node:test';
+
 import { getGitLabCiInfo } from './ci-gitlab.js';
 
 describe('getGitLabCiInfo', () => {

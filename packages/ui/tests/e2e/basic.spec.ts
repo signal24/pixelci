@@ -6,8 +6,7 @@ colorSchemes.forEach(colorScheme => {
     test.describe(`${colorScheme} mode`, () => {
         test.use({ colorScheme });
 
-        const takeScreenshot = (page: Page, name: string) =>
-            page.screenshot({ path: `screenshots/${name} (${colorScheme}).png` });
+        const takeScreenshot = (page: Page, name: string) => page.screenshot({ path: `screenshots/${name} (${colorScheme}).png` });
 
         test('displays all the things', async ({ page }) => {
             await page.goto('/');
@@ -28,9 +27,7 @@ colorSchemes.forEach(colorScheme => {
 
             await page.locator('.app').first().click();
             await page.waitForSelector('.build');
-            await page
-                .locator('.build-date')
-                .evaluateAll(els => els.forEach(el => (el.textContent = '1/1/25 12:32 PM')));
+            await page.locator('.build-date').evaluateAll(els => els.forEach(el => (el.textContent = '1/1/25 12:32 PM')));
             await takeScreenshot(page, 'Build List');
 
             await page.route(/\/image$/, async route => {

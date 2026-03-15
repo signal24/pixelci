@@ -100,9 +100,7 @@ export class AppsController {
         if (!app) throw new HttpNotFoundError();
 
         if (body.defaultBranchId) {
-            const branch = await BranchEntity.query()
-                .filter({ appId: id, id: body.defaultBranchId })
-                .findOneOrUndefined();
+            const branch = await BranchEntity.query().filter({ appId: id, id: body.defaultBranchId }).findOneOrUndefined();
             if (!branch) throw new HttpBadRequestError('invalid defaultBranchId');
         }
 
@@ -124,19 +122,13 @@ export class AppsController {
 
     @http.GET('vcs-projects/search')
     @http.middleware(AdminAuthMiddleware)
-    async searchVcsProjects(
-        query: HttpQueries<{ vcsId: string; search: string }>,
-        user: UserEntity
-    ): Promise<IVcsProject[]> {
+    async searchVcsProjects(query: HttpQueries<{ vcsId: string; search: string }>, user: UserEntity): Promise<IVcsProject[]> {
         return this.vcsService.searchProjects(user, query.vcsId, query.search);
     }
 
     @http.GET('vcs-projects/resolve')
     @http.middleware(AdminAuthMiddleware)
-    async resolveVcsProject(
-        query: HttpQueries<{ vcsId: string; url: string }>,
-        user: UserEntity
-    ): Promise<IVcsProject> {
+    async resolveVcsProject(query: HttpQueries<{ vcsId: string; url: string }>, user: UserEntity): Promise<IVcsProject> {
         const urlObj = new URL(query.url);
         const projectPath = urlObj.pathname
             .replace(/^\//, '')

@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/vue';
 import { defineStore } from 'pinia';
+
 import type { ISessionResponse } from './openapi-client-generated';
 
 type SessionUser = ISessionResponse;

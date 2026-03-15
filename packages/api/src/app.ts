@@ -1,11 +1,7 @@
 import { createApp, CreateAppOptions } from '@zyno-io/dk-server-foundation';
 import { compact } from 'lodash';
 
-import {
-    AdminAuthMiddleware,
-    BuildCiTokenMiddleware,
-    UserAuthMiddleware
-} from './accessories/AuthMiddleware.accessory';
+import { AdminAuthMiddleware, BuildCiTokenMiddleware, UserAuthMiddleware } from './accessories/AuthMiddleware.accessory';
 import { UserResolver } from './accessories/Controller.accessory';
 import { AppConfig } from './config';
 import { AppsController } from './controllers/Apps.controller';

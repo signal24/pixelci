@@ -15,15 +15,10 @@ export type IAppScreenResponse = Pick<ScreenEntity, 'id' | 'name'>;
 export type IBuildScreenResponse = {
     screenId: string;
     name: string;
-    currentBuildScreen:
-        | Pick<BuildScreenEntity, 'id' | 'buildId' | 'matchedBuildId' | 'approvalBuildId' | 'screenId' | 'status'>
-        | undefined;
-    referenceBuildScreen:
-        | Pick<BuildScreenEntity, 'id' | 'buildId' | 'matchedBuildId' | 'approvalBuildId' | 'screenId' | 'status'>
-        | undefined;
+    currentBuildScreen: Pick<BuildScreenEntity, 'id' | 'buildId' | 'matchedBuildId' | 'approvalBuildId' | 'screenId' | 'status'> | undefined;
+    referenceBuildScreen: Pick<BuildScreenEntity, 'id' | 'buildId' | 'matchedBuildId' | 'approvalBuildId' | 'screenId' | 'status'> | undefined;
 };
-export type IBuildScreenCreateResponse = Pick<BuildScreenEntity, 'id' | 'screenId' | 'status'> &
-    Pick<ScreenEntity, 'name'>;
+export type IBuildScreenCreateResponse = Pick<BuildScreenEntity, 'id' | 'screenId' | 'status'> & Pick<ScreenEntity, 'name'>;
 
 @ApiController('/api/apps/:appId/builds/:id')
 export class BuildScreensController {
@@ -47,15 +42,11 @@ export class BuildScreensController {
 
         const currentBuildScreens = await BuildScreenEntity.query().filter({ appId, buildId: build.id }).find();
 
-        const referenceBuildScreens = referenceBuild
-            ? await BuildScreenEntity.query().filter({ appId, buildId: referenceBuild.id }).find()
-            : [];
+        const referenceBuildScreens = referenceBuild ? await BuildScreenEntity.query().filter({ appId, buildId: referenceBuild.id }).find() : [];
 
         const currentBuildScreensById = keyBy(currentBuildScreens, 'screenId');
         const referenceBuildScreensById = keyBy(referenceBuildScreens, 'screenId');
-        const screenIds = uniq(
-            [...currentBuildScreens, ...referenceBuildScreens].map(buildScreen => buildScreen.screenId)
-        );
+        const screenIds = uniq([...currentBuildScreens, ...referenceBuildScreens].map(buildScreen => buildScreen.screenId));
 
         const buildScreens = [...screenIds].map(screenId => ({
             screenId,
@@ -77,11 +68,7 @@ export class BuildScreensController {
 
     @http.POST('screens')
     @http.middleware(BuildCiTokenMiddleware)
-    async uploadScreen(
-        appId: string,
-        id: string,
-        body: HttpBody<{ image: UploadedFile }>
-    ): Promise<IBuildScreenCreateResponse | { status: string }> {
+    async uploadScreen(appId: string, id: string, body: HttpBody<{ image: UploadedFile }>): Promise<IBuildScreenCreateResponse | { status: string }> {
         const build = await BuildEntity.query().filter({ id, appId }).findOneOrUndefined();
         if (!build) throw new HttpNotFoundError();
         if (build.status !== 'draft') throw new HttpBadRequestError('build is not in draft state');
@@ -102,10 +89,7 @@ export class BuildScreensController {
                     txn
                 );
             } else {
-                const buildScreen = await txn
-                    .query(BuildScreenEntity)
-                    .filter({ buildId: id, screenId: screen.id })
-                    .findOneOrUndefined();
+                const buildScreen = await txn.query(BuildScreenEntity).filter({ buildId: id, screenId: screen.id }).findOneOrUndefined();
                 if (buildScreen) throw new HttpBadRequestError('screen with same name already uploaded for this build');
             }
 
@@ -122,11 +106,7 @@ export class BuildScreensController {
                 txn
             );
 
-            await this.s3Svc.uploadFile(
-                body.image.path,
-                this.s3Svc.getPathForScreen(appId, id, screen.id),
-                'image/png'
-            );
+            await this.s3Svc.uploadFile(body.image.path, this.s3Svc.getPathForScreen(appId, id, screen.id), 'image/png');
 
             return {
                 ...buildScreen,

@@ -1,4 +1,5 @@
 import { existsSync } from 'fs';
+
 import { getApi } from './api.js';
 import { getJobInfo } from './ci.js';
 import { AppError, handleError } from './error.js';
@@ -8,8 +9,7 @@ process.on('unhandledRejection', handleError);
 process.on('uncaughtException', handleError);
 
 const sourcePath = process.argv[2] ?? process.env.PIXELCI_IMAGES_PATH;
-if (!sourcePath)
-    throw new AppError('No source path provided. Use PIXELCI_IMAGES_PATH environment variable or pass as argument');
+if (!sourcePath) throw new AppError('No source path provided. Use PIXELCI_IMAGES_PATH environment variable or pass as argument');
 if (!existsSync(sourcePath)) throw new AppError(`Source path "${sourcePath}" does not exist`);
 
 const imageFiles = await getImages(sourcePath);

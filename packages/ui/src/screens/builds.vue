@@ -68,10 +68,7 @@
                                 <!-- processing -->
                                 <i class="fa fa-stopwatch fa-sm fa-fw" v-if="build.status === 'processing'" />
                                 <!-- needs review -->
-                                <i
-                                    class="fa fa-magnifying-glass fa-sm fa-fw text-inherit"
-                                    v-if="build.status === 'needs review'"
-                                />
+                                <i class="fa fa-magnifying-glass fa-sm fa-fw text-inherit" v-if="build.status === 'needs review'" />
                                 <!-- draft -->
                                 <i class="fa fa-pen-to-square fa-sm fa-fw" v-if="build.status === 'draft'" />
                                 <!-- no changes -->
@@ -89,20 +86,14 @@
 </template>
 
 <script lang="ts" setup>
-import {
-    AppsApi,
-    BranchesApi,
-    BuildsApi,
-    type IAppShowResponse,
-    type IBranchResponse,
-    type IBuildResponse
-} from '@/openapi-client-generated';
-import LoaderModal from '@/shared/components/loader-modal.vue';
-import { useStore } from '@/store';
 import { dataFrom } from '@zyno-io/openapi-client-codegen';
 import { handleErrorAndAlert } from '@zyno-io/vue-foundation';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+
+import { AppsApi, BranchesApi, BuildsApi, type IAppShowResponse, type IBranchResponse, type IBuildResponse } from '@/openapi-client-generated';
+import LoaderModal from '@/shared/components/loader-modal.vue';
+import { useStore } from '@/store';
 
 const route = useRoute();
 const router = useRouter();

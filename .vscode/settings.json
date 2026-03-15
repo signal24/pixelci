@@ -1,11 +1,11 @@
 {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.defaultFormatter": "oxc.oxc-vscode",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
         "source.fixAll.oxc": "explicit",
         "source.organizeImports": "explicit"
     },
-    "prettier.configPath": ".prettierrc.json",
+    "oxc.fmt.configPath": ".oxfmtrc.json",
     "oxc.configPath": ".oxlintrc.json",
     "oxc.enable": true,
     "search.exclude": {

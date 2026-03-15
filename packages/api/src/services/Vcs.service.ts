@@ -30,11 +30,7 @@ export class VcsService {
         return this.runWithProvider(providerId, provider => provider.getProviderLoginUrl(redirectUri, state));
     }
 
-    async exchangeProviderCode(
-        providerId: string,
-        redirectUri: string,
-        code: string
-    ): Promise<IVcsLoginSessionResponse> {
+    async exchangeProviderCode(providerId: string, redirectUri: string, code: string): Promise<IVcsLoginSessionResponse> {
         return this.runWithProvider(providerId, provider => provider.exchangeProviderCode(redirectUri, code));
     }
 

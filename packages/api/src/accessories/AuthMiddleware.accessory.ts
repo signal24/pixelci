@@ -1,8 +1,7 @@
-import { createHash } from 'crypto';
-
 import { HttpRequest, HttpUnauthorizedError } from '@deepkit/http';
 import { Logger } from '@deepkit/logger';
 import { createAuthMiddleware, HttpDetailedAccessDeniedError, HttpMiddleware } from '@zyno-io/dk-server-foundation';
+import { createHash } from 'crypto';
 
 import { BuildEntity } from '../entities/Build.entity';
 import { UserEntity } from '../entities/User.entity';
@@ -96,9 +95,7 @@ export async function validateCiToken(ciToken: string, vcsId: string, logger: Lo
     }
 
     if (!jobResponse.ok) {
-        logger.warn(
-            `CI token validation failed: GitLab /api/v4/job returned ${jobResponse.status} ${jobResponse.statusText}`
-        );
+        logger.warn(`CI token validation failed: GitLab /api/v4/job returned ${jobResponse.status} ${jobResponse.statusText}`);
         throw new HttpUnauthorizedError();
     }
 

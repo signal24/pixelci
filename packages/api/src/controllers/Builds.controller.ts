@@ -1,22 +1,10 @@
-import {
-    http,
-    HttpBadRequestError,
-    HttpNotFoundError,
-    HttpQueries,
-    HttpRequest,
-    HttpUnauthorizedError
-} from '@deepkit/http';
+import { http, HttpBadRequestError, HttpNotFoundError, HttpQueries, HttpRequest, HttpUnauthorizedError } from '@deepkit/http';
+import { ScopedLogger } from '@deepkit/logger';
 import { createPersistedEntity, OkResponse, uuid7, WorkerService } from '@zyno-io/dk-server-foundation';
 import axios from 'axios';
-
-import { ScopedLogger } from '@deepkit/logger';
 import { keyBy, uniq } from 'lodash';
-import {
-    BuildCiTokenMiddleware,
-    hashCiToken,
-    UserAuthMiddleware,
-    validateCiToken
-} from '../accessories/AuthMiddleware.accessory';
+
+import { BuildCiTokenMiddleware, hashCiToken, UserAuthMiddleware, validateCiToken } from '../accessories/AuthMiddleware.accessory';
 import { ApiController } from '../accessories/Controller.accessory';
 import { DB } from '../database';
 import { AppEntity } from '../entities/App.entity';
@@ -27,10 +15,7 @@ import { UserEntity } from '../entities/User.entity';
 import { ProcessBuildJob } from '../jobs/ProcessBuild.job';
 import { VcsService } from '../services/Vcs.service';
 
-type IBuildResponse = Pick<
-    BuildEntity,
-    'id' | 'branchId' | 'commitHash' | 'commitSubject' | 'commitAuthor' | 'createdAt' | 'status'
-> & {
+type IBuildResponse = Pick<BuildEntity, 'id' | 'branchId' | 'commitHash' | 'commitSubject' | 'commitAuthor' | 'createdAt' | 'status'> & {
     branchName: string;
 };
 type IBuildBasicResponse = Pick<BuildEntity, 'status'>;
@@ -122,9 +107,7 @@ export class BuildsController {
 
         // Validate that the CI job belongs to the correct project
         if (app.vcsProjectId && ciJobData.vcsProjectId !== app.vcsProjectId) {
-            this.logger.warn(
-                `Build creation failed: vcsProjectId mismatch (expected=${app.vcsProjectId}, got=${ciJobData.vcsProjectId})`
-            );
+            this.logger.warn(`Build creation failed: vcsProjectId mismatch (expected=${app.vcsProjectId}, got=${ciJobData.vcsProjectId})`);
             throw new HttpUnauthorizedError();
         }
 
@@ -146,10 +129,7 @@ export class BuildsController {
                 );
             }
 
-            const existingBuild = await txn
-                .query(BuildEntity)
-                .filter({ appId, branchId: branch.id, commitHash })
-                .findOneOrUndefined();
+            const existingBuild = await txn.query(BuildEntity).filter({ appId, branchId: branch.id, commitHash }).findOneOrUndefined();
             if (existingBuild) {
                 // Update the token hash so subsequent calls use the current token
                 existingBuild.ciTokenHash = ciTokenHash;

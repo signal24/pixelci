@@ -3,6 +3,7 @@ import { assert, ReceiveType } from '@deepkit/type';
 import { createPersistedEntity, JWT, sleepSecs, TestingFacade, TestingHelpers } from '@zyno-io/dk-server-foundation';
 import { readFileSync } from 'fs';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
+
 import { CoreAppOptions } from '../../src/app';
 import { AppEntity } from '../../src/entities/App.entity';
 import { BranchEntity } from '../../src/entities/Branch.entity';
@@ -168,10 +169,7 @@ async function runScenario(facade: TestingFacade, scenarioId: string, scenario: 
     console.log('Processing build...');
     await makeRequest<{ ok: true }>(
         facade,
-        HttpRequest.POST(`/api/apps/${APP_ID}/builds/${buildId}/process`).header(
-            'authorization',
-            `Bearer ${TEST_CI_TOKEN}`
-        )
+        HttpRequest.POST(`/api/apps/${APP_ID}/builds/${buildId}/process`).header('authorization', `Bearer ${TEST_CI_TOKEN}`)
     );
 
     console.log('Waiting for build to be processed...');
@@ -180,10 +178,7 @@ async function runScenario(facade: TestingFacade, scenarioId: string, scenario: 
     while (true) {
         const buildStatusResponse = await makeRequest<{ status: BuildEntity['status'] }>(
             facade,
-            HttpRequest.GET(`/api/apps/${APP_ID}/builds/${buildId}/status`).header(
-                'authorization',
-                `Bearer ${TEST_CI_TOKEN}`
-            )
+            HttpRequest.GET(`/api/apps/${APP_ID}/builds/${buildId}/status`).header('authorization', `Bearer ${TEST_CI_TOKEN}`)
         );
         buildStatus = buildStatusResponse.status;
 

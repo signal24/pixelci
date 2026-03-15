@@ -1,7 +1,7 @@
 import { http, HttpBadRequestError, HttpBody, HttpQueries } from '@deepkit/http';
-
 import { uuid } from '@deepkit/type';
 import { createEntity, JWT } from '@zyno-io/dk-server-foundation';
+
 import { ApiController } from '../accessories/Controller.accessory';
 import { UserEntity } from '../entities/User.entity';
 import { IGitLabConfig, VcsIntegrationEntity } from '../entities/VcsIntegration.entity';
@@ -50,10 +50,7 @@ export class SessionController {
     }
 
     @http.GET('providers/:id/login-url')
-    async getProviderLoginUrl(
-        id: string,
-        query: HttpQueries<{ redirectUri: string; state?: string }>
-    ): Promise<{ url: string }> {
+    async getProviderLoginUrl(id: string, query: HttpQueries<{ redirectUri: string; state?: string }>): Promise<{ url: string }> {
         const url = await this.vcsService.getProviderLoginUrl(id, query.redirectUri, query.state);
         return { url };
     }

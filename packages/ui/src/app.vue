@@ -15,10 +15,10 @@
 </template>
 
 <script lang="ts" setup>
+import { dataFrom } from '@zyno-io/openapi-client-codegen';
 import { OverlayContainer } from '@zyno-io/vue-foundation';
 import { onMounted, ref } from 'vue';
 
-import { dataFrom } from '@zyno-io/openapi-client-codegen';
 import { SessionApi } from './openapi-client-generated';
 import Login from './screens/login.vue';
 import Onboarding from './screens/onboarding.vue';

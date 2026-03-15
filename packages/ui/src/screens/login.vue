@@ -5,9 +5,7 @@
         <div class="card">
             <h2>Login</h2>
 
-            <button v-for="provider in providers" class="primary" @click="login(provider)">
-                Login via {{ provider.name }}
-            </button>
+            <button v-for="provider in providers" class="primary" @click="login(provider)">Login via {{ provider.name }}</button>
         </div>
     </div>
 
@@ -16,14 +14,14 @@
 
 <script lang="ts" setup>
 import { dataFrom, dataFromAsync, OpenApiError } from '@zyno-io/openapi-client-codegen';
+import { handleErrorAndAlert } from '@zyno-io/vue-foundation';
 import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import { LOCAL_STORAGE_AUTH_KEY } from '@/openapi-client';
 import { type ISessionProvider, SessionApi } from '@/openapi-client-generated';
 import LoaderModal from '@/shared/components/loader-modal.vue';
 import { useStore } from '@/store';
-import { handleErrorAndAlert } from '@zyno-io/vue-foundation';
-import { useRoute, useRouter } from 'vue-router';
 
 const store = useStore();
 const route = useRoute();

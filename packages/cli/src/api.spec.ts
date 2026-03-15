@@ -1,5 +1,6 @@
-import { describe, it, mock, beforeEach, after } from 'node:test';
 import assert from 'node:assert/strict';
+import { describe, it, mock, beforeEach, after } from 'node:test';
+
 import { PixelCiApi, getApi } from './api.js';
 import { AppError } from './error.js';
 

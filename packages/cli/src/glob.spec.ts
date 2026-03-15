@@ -1,5 +1,5 @@
-import { describe, it, mock, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
+import { describe, it, mock, beforeEach } from 'node:test';
 
 const mockGlob = mock.fn<(pattern: string, cb: (err: Error | null, files: string[]) => void) => void>();
 
@@ -16,9 +16,7 @@ describe('getImages', () => {
 
     it('should return png files matching the glob pattern', async () => {
         const files = ['src/a.png', 'src/sub/b.png'];
-        mockGlob.mock.mockImplementation((_pattern: string, cb: (err: Error | null, files: string[]) => void) =>
-            cb(null, files)
-        );
+        mockGlob.mock.mockImplementation((_pattern: string, cb: (err: Error | null, files: string[]) => void) => cb(null, files));
 
         const result = await getImages('src');
 
@@ -29,17 +27,13 @@ describe('getImages', () => {
 
     it('should reject on glob error', async () => {
         const error = new Error('glob failed');
-        mockGlob.mock.mockImplementation((_pattern: string, cb: (err: Error | null, files: string[]) => void) =>
-            cb(error, [])
-        );
+        mockGlob.mock.mockImplementation((_pattern: string, cb: (err: Error | null, files: string[]) => void) => cb(error, []));
 
         await assert.rejects(() => getImages('bad/path'), { message: 'glob failed' });
     });
 
     it('should return empty array when no files match', async () => {
-        mockGlob.mock.mockImplementation((_pattern: string, cb: (err: Error | null, files: string[]) => void) =>
-            cb(null, [])
-        );
+        mockGlob.mock.mockImplementation((_pattern: string, cb: (err: Error | null, files: string[]) => void) => cb(null, []));
 
         const result = await getImages('empty');
 

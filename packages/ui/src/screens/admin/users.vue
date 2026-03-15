@@ -42,12 +42,13 @@
 </template>
 
 <script lang="ts" setup>
-import { UsersApi, type IuserListResponse } from '@/openapi-client-generated';
-import LoaderModal from '@/shared/components/loader-modal.vue';
-import { useStore } from '@/store';
 import { dataFrom, dataFromAsync } from '@zyno-io/openapi-client-codegen';
 import { handleErrorAndAlert, showConfirm } from '@zyno-io/vue-foundation';
 import { computed, onMounted, ref } from 'vue';
+
+import { UsersApi, type IuserListResponse } from '@/openapi-client-generated';
+import LoaderModal from '@/shared/components/loader-modal.vue';
+import { useStore } from '@/store';
 
 const store = useStore();
 const users = ref<IuserListResponse[]>();

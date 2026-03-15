@@ -37,9 +37,7 @@
                 <div class="redirect-url">
                     <span class="redirect-label">OAuth Redirect URI</span>
                     <code>{{ redirectUrl }}</code>
-                    <button type="button" class="copy-btn" @click="copyRedirectUrl">
-                        <i class="fa fa-copy" /> Copy
-                    </button>
+                    <button type="button" class="copy-btn" @click="copyRedirectUrl"><i class="fa fa-copy" /> Copy</button>
                     <p class="hint">Use this URL as the redirect URI when configuring your GitLab OAuth application.</p>
                 </div>
 

@@ -3,9 +3,11 @@ import { Logger, ScopedLogger } from '@deepkit/logger';
 import { assert } from '@deepkit/type';
 import { JWT, r } from '@zyno-io/dk-server-foundation';
 import axios from 'axios';
+
+import type { IVcsLoginSessionResponse, IVcsProject, IVcsServiceImpl } from './Vcs.service';
+
 import { UserEntity } from '../entities/User.entity';
 import { IGitLabConfig } from '../entities/VcsIntegration.entity';
-import type { IVcsLoginSessionResponse, IVcsProject, IVcsServiceImpl } from './Vcs.service';
 
 export class VcsGitLabService implements IVcsServiceImpl {
     private logger = r<ScopedLogger>(Logger);

@@ -1,5 +1,4 @@
 import { fileURLToPath } from 'node:url';
-
 import { mergeConfig } from 'vite';
 import { configDefaults, defineConfig } from 'vitest/config';
 

@@ -3,6 +3,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import assert from 'assert';
 import { readFile } from 'fs/promises';
 import { Readable } from 'stream';
+
 import { AppConfig } from '../config';
 
 export class S3Service {

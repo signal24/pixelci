@@ -66,18 +66,14 @@ export class ProcessBuildJob extends BaseJob<IProcessBuildJobData> {
                   })
                   .orderBy('id', 'desc')
                   .findOneOrUndefined();
-        const previousBuildScreens = previousBuild
-            ? await BuildScreenEntity.query().filter({ appId, buildId: previousBuild.id }).find()
-            : [];
+        const previousBuildScreens = previousBuild ? await BuildScreenEntity.query().filter({ appId, buildId: previousBuild.id }).find() : [];
         const previousBuildScreensById = keyBy(previousBuildScreens, 'screenId');
 
         const referenceBuild = await BuildEntity.query()
             .filter({ appId, branchId: app.defaultBranchId, status: 'changes approved', id: { $lt: currentBuild.id } })
             .orderBy('id', 'desc')
             .findOneOrUndefined();
-        const referenceBuildScreens = referenceBuild
-            ? await BuildScreenEntity.query().filter({ appId, buildId: referenceBuild.id }).find()
-            : [];
+        const referenceBuildScreens = referenceBuild ? await BuildScreenEntity.query().filter({ appId, buildId: referenceBuild.id }).find() : [];
         const referenceBuildScreensById = keyBy(referenceBuildScreens, 'screenId');
 
         if (previousBuild) logger.info('Found previous build', { id: previousBuild.id });
@@ -90,9 +86,7 @@ export class ProcessBuildJob extends BaseJob<IProcessBuildJobData> {
             screenId: currentBuildScreen.screenId,
             currentBuildScreen,
             previousBuildScreen: previousBuildScreensById[currentBuildScreen.screenId] as BuildScreenEntity | undefined,
-            referenceBuildScreen: referenceBuildScreensById[currentBuildScreen.screenId] as
-                | BuildScreenEntity
-                | undefined
+            referenceBuildScreen: referenceBuildScreensById[currentBuildScreen.screenId] as BuildScreenEntity | undefined
         }));
 
         screenLoop: for (const screen of screens) {
@@ -111,10 +105,8 @@ export class ProcessBuildJob extends BaseJob<IProcessBuildJobData> {
 
                 if (isMatch) {
                     logger.info('Current build screen matches approved changes', { screenId: screen.screenId });
-                    screen.currentBuildScreen.matchedBuildId =
-                        screen.previousBuildScreen.matchedBuildId ?? screen.previousBuildScreen.buildId;
-                    screen.currentBuildScreen.approvalBuildId =
-                        screen.previousBuildScreen.approvalBuildId ?? screen.previousBuildScreen.buildId;
+                    screen.currentBuildScreen.matchedBuildId = screen.previousBuildScreen.matchedBuildId ?? screen.previousBuildScreen.buildId;
+                    screen.currentBuildScreen.approvalBuildId = screen.previousBuildScreen.approvalBuildId ?? screen.previousBuildScreen.buildId;
                     screen.currentBuildScreen.status = 'changes approved';
                     continue;
                 }
@@ -124,21 +116,14 @@ export class ProcessBuildJob extends BaseJob<IProcessBuildJobData> {
 
             // if we have a reference build screen, compare the current screen with the reference build screen
             if (screen.referenceBuildScreen) {
-                const isMatch = await this.performDiff(
-                    appId,
-                    screen.referenceBuildScreen.buildId,
-                    currentBuild.id,
-                    screen.screenId,
-                    diffThreshold
-                );
+                const isMatch = await this.performDiff(appId, screen.referenceBuildScreen.buildId, currentBuild.id, screen.screenId, diffThreshold);
 
                 if (isMatch) {
                     logger.info('Current build screen matches reference', {
                         screenId: screen.screenId,
                         status: screen.currentBuildScreen.status
                     });
-                    screen.currentBuildScreen.matchedBuildId =
-                        screen.referenceBuildScreen.matchedBuildId ?? screen.referenceBuildScreen.buildId;
+                    screen.currentBuildScreen.matchedBuildId = screen.referenceBuildScreen.matchedBuildId ?? screen.referenceBuildScreen.buildId;
                     screen.currentBuildScreen.status = 'no changes';
                     continue;
                 }
@@ -152,8 +137,7 @@ export class ProcessBuildJob extends BaseJob<IProcessBuildJobData> {
             // look for any approved changes to this screen on another branch since the build that last changed it
             // since the IDs are all uuid7, we know they're time-ordered, and therefore we temporally compare build IDs
             // and screen IDs even though they don't represent the same thing
-            const approvalBuildIdForReferenceScreen =
-                screen.referenceBuildScreen?.approvalBuildId ?? screen.referenceBuildScreen?.buildId;
+            const approvalBuildIdForReferenceScreen = screen.referenceBuildScreen?.approvalBuildId ?? screen.referenceBuildScreen?.buildId;
             const approvedBuildScreensSinceApprovedReferenceBuild = await BuildScreenEntity.query()
                 .filter({
                     ...(approvalBuildIdForReferenceScreen && { id: { $gt: approvalBuildIdForReferenceScreen } }),
@@ -181,8 +165,7 @@ export class ProcessBuildJob extends BaseJob<IProcessBuildJobData> {
                     logger.info('Current build screen matches previously approved changes', {
                         screenId: screen.screenId
                     });
-                    screen.currentBuildScreen.matchedBuildId =
-                        approvedBuildScreen.matchedBuildId ?? approvedBuildScreen.buildId;
+                    screen.currentBuildScreen.matchedBuildId = approvedBuildScreen.matchedBuildId ?? approvedBuildScreen.buildId;
                     screen.currentBuildScreen.approvalBuildId = approvedBuildScreen.buildId;
                     screen.currentBuildScreen.status = 'changes approved';
                     continue screenLoop;
@@ -210,11 +193,7 @@ export class ProcessBuildJob extends BaseJob<IProcessBuildJobData> {
 
             // all changes are approved if the current build screen either has no changes or the changes are previously approved
         } else if (
-            screens.every(
-                screen =>
-                    screen.currentBuildScreen.status === 'no changes' ||
-                    screen.currentBuildScreen.status === 'changes approved'
-            )
+            screens.every(screen => screen.currentBuildScreen.status === 'no changes' || screen.currentBuildScreen.status === 'changes approved')
         ) {
             currentBuild.status = 'changes approved';
         }
@@ -239,22 +218,12 @@ export class ProcessBuildJob extends BaseJob<IProcessBuildJobData> {
         });
     }
 
-    private async performDiff(
-        appId: string,
-        leftBuildId: string,
-        rightBuildId: string,
-        screenId: string,
-        diffThreshold: number
-    ) {
+    private async performDiff(appId: string, leftBuildId: string, rightBuildId: string, screenId: string, diffThreshold: number) {
         this.logger.info('Performing diff', { leftBuildId, rightBuildId, screenId });
 
         const leftScreenData = await this.s3Svc.getBuffer(this.s3Svc.getPathForScreen(appId, leftBuildId, screenId));
         const rightScreenData = await this.s3Svc.getBuffer(this.s3Svc.getPathForScreen(appId, rightBuildId, screenId));
-        const { getDiffPng, diffPct } = await this.pixelMatch.getDiff(
-            leftScreenData,
-            rightScreenData,
-            this.appConfig.DEFAULT_PIXEL_MATCH_THRESHOLD
-        );
+        const { getDiffPng, diffPct } = await this.pixelMatch.getDiff(leftScreenData, rightScreenData, this.appConfig.DEFAULT_PIXEL_MATCH_THRESHOLD);
 
         if (diffPct > diffThreshold) {
             this.logger.info('Diff exceeds threshold. Storing diff.', { diffPct, diffThreshold });

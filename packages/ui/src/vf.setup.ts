@@ -1,5 +1,6 @@
-import { configureVf, createFilters, installVf } from '@zyno-io/vue-foundation';
 import type { App } from 'vue';
+
+import { configureVf, createFilters, installVf } from '@zyno-io/vue-foundation';
 
 // configure Vue Foundation
 configureVf({});

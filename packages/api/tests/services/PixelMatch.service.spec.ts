@@ -1,16 +1,10 @@
-import { describe, it, mock } from 'node:test';
 import assert from 'node:assert/strict';
+import { describe, it, mock } from 'node:test';
 import { PNG } from 'pngjs/browser';
 
 // pixelmatch is ESM-only and requires dynamic import. Monkey-patch lodash.memoize
 // before requiring the service so its module-level memoize() call uses our mock.
-const mockPixelmatch = (
-    img1: Uint8Array,
-    img2: Uint8Array,
-    output: Uint8Array | null,
-    width: number,
-    height: number
-) => {
+const mockPixelmatch = (img1: Uint8Array, img2: Uint8Array, output: Uint8Array | null, width: number, height: number) => {
     let diffCount = 0;
     for (let i = 0; i < width * height; i++) {
         const idx = i << 2;

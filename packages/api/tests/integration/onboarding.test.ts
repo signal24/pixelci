@@ -1,5 +1,6 @@
 import { HttpRequest } from '@deepkit/http';
 import { createPersistedEntity, JWT, TestingHelpers } from '@zyno-io/dk-server-foundation';
+
 import { CoreAppOptions } from '../../src/app';
 import { UserEntity } from '../../src/entities/User.entity';
 
@@ -110,9 +111,7 @@ async function testOnboardingStatusAfterSetup(facade: ReturnType<typeof TestingH
     console.log('  PASS');
 }
 
-async function testCreateOnboardingVcsIntegrationBlocked(
-    facade: ReturnType<typeof TestingHelpers.createTestingFacade>
-) {
+async function testCreateOnboardingVcsIntegrationBlocked(facade: ReturnType<typeof TestingHelpers.createTestingFacade>) {
     console.log('\nTest: create onboarding VCS integration when already onboarded → 400');
     const response = await facade.request(
         HttpRequest.POST('/api/session/onboarding/vcs-integration').json({
@@ -165,14 +164,9 @@ async function createNonAdminUser(id: string) {
     });
 }
 
-async function testAdminCanListVcsIntegrations(
-    facade: ReturnType<typeof TestingHelpers.createTestingFacade>,
-    jwt: string
-) {
+async function testAdminCanListVcsIntegrations(facade: ReturnType<typeof TestingHelpers.createTestingFacade>, jwt: string) {
     console.log('\nTest: admin can list VCS integrations → 200');
-    const response = await facade.request(
-        HttpRequest.GET('/api/admin/vcs-integrations').header('authorization', `Bearer ${jwt}`)
-    );
+    const response = await facade.request(HttpRequest.GET('/api/admin/vcs-integrations').header('authorization', `Bearer ${jwt}`));
     assertStatus(response, 200);
     const body = response.json as Array<{ id: string; name: string; platform: string }>;
     if (!Array.isArray(body) || body.length === 0) {
@@ -192,10 +186,7 @@ async function testAdminCanListUsers(facade: ReturnType<typeof TestingHelpers.cr
     console.log('  PASS');
 }
 
-async function testNonAdminCannotAccessAdmin(
-    facade: ReturnType<typeof TestingHelpers.createTestingFacade>,
-    jwt: string
-) {
+async function testNonAdminCannotAccessAdmin(facade: ReturnType<typeof TestingHelpers.createTestingFacade>, jwt: string) {
     console.log('\nTest: non-admin cannot access admin endpoints → 403');
     const endpoints = [HttpRequest.GET('/api/admin/vcs-integrations'), HttpRequest.GET('/api/admin/users')];
     for (const request of endpoints) {
@@ -207,16 +198,10 @@ async function testNonAdminCannotAccessAdmin(
     console.log('  PASS');
 }
 
-async function testAdminCanToggleUserAdmin(
-    facade: ReturnType<typeof TestingHelpers.createTestingFacade>,
-    jwt: string,
-    targetUserId: string
-) {
+async function testAdminCanToggleUserAdmin(facade: ReturnType<typeof TestingHelpers.createTestingFacade>, jwt: string, targetUserId: string) {
     console.log('\nTest: admin can promote user to admin → 200');
     const promoteResponse = await facade.request(
-        HttpRequest.PUT(`/api/admin/users/${targetUserId}`)
-            .header('authorization', `Bearer ${jwt}`)
-            .json({ isAdmin: true })
+        HttpRequest.PUT(`/api/admin/users/${targetUserId}`).header('authorization', `Bearer ${jwt}`).json({ isAdmin: true })
     );
     assertStatus(promoteResponse, 200);
     const promoteBody = promoteResponse.json as { id: string; isAdmin: boolean };
@@ -226,9 +211,7 @@ async function testAdminCanToggleUserAdmin(
 
     console.log('\nTest: admin can demote user from admin → 200');
     const demoteResponse = await facade.request(
-        HttpRequest.PUT(`/api/admin/users/${targetUserId}`)
-            .header('authorization', `Bearer ${jwt}`)
-            .json({ isAdmin: false })
+        HttpRequest.PUT(`/api/admin/users/${targetUserId}`).header('authorization', `Bearer ${jwt}`).json({ isAdmin: false })
     );
     assertStatus(demoteResponse, 200);
     const demoteBody = demoteResponse.json as { id: string; isAdmin: boolean };
@@ -284,9 +267,7 @@ async function testVcsIntegrationCrud(facade: ReturnType<typeof TestingHelpers.c
 
     // Show
     console.log('  Reading integration...');
-    const showResponse = await facade.request(
-        HttpRequest.GET(`/api/admin/vcs-integrations/${created.id}`).header('authorization', `Bearer ${jwt}`)
-    );
+    const showResponse = await facade.request(HttpRequest.GET(`/api/admin/vcs-integrations/${created.id}`).header('authorization', `Bearer ${jwt}`));
     assertStatus(showResponse, 200);
     const shown = showResponse.json as { id: string; name: string; config: { url: string } };
     if (shown.config.url !== 'https://crud-gitlab.example.com') {

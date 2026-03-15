@@ -1,6 +1,7 @@
 import { HttpRequest } from '@deepkit/http';
 import { createPersistedEntity, TestingHelpers } from '@zyno-io/dk-server-foundation';
 import { createServer, IncomingMessage, Server, ServerResponse } from 'http';
+
 import { CoreAppOptions } from '../../src/app';
 import { AppEntity } from '../../src/entities/App.entity';
 import { BranchEntity } from '../../src/entities/Branch.entity';
@@ -142,9 +143,7 @@ async function testNoToken(facade: Facade) {
 
 async function testInvalidToken(facade: Facade) {
     console.log('\nTest: createBuild with invalid token → 401');
-    const response = await facade.request(
-        HttpRequest.POST(`/api/apps/${APP_ID}/builds`).header('authorization', 'Bearer invalid-token')
-    );
+    const response = await facade.request(HttpRequest.POST(`/api/apps/${APP_ID}/builds`).header('authorization', 'Bearer invalid-token'));
     if (response.statusCode !== 401) {
         throw new Error(`Expected 401 but got ${response.statusCode}: ${response.body}`);
     }
@@ -169,9 +168,7 @@ async function testValidTokenWrongProject(facade: Facade) {
         name: 'main'
     });
 
-    const response = await facade.request(
-        HttpRequest.POST(`/api/apps/${wrongAppId}/builds`).header('authorization', `Bearer ${TEST_CI_TOKEN}`)
-    );
+    const response = await facade.request(HttpRequest.POST(`/api/apps/${wrongAppId}/builds`).header('authorization', `Bearer ${TEST_CI_TOKEN}`));
     if (response.statusCode !== 401) {
         throw new Error(`Expected 401 but got ${response.statusCode}: ${response.body}`);
     }
@@ -180,9 +177,7 @@ async function testValidTokenWrongProject(facade: Facade) {
 
 async function testValidToken(facade: Facade) {
     console.log('\nTest: createBuild with valid CI token → 200');
-    const response = await facade.request(
-        HttpRequest.POST(`/api/apps/${APP_ID}/builds`).header('authorization', `Bearer ${TEST_CI_TOKEN}`)
-    );
+    const response = await facade.request(HttpRequest.POST(`/api/apps/${APP_ID}/builds`).header('authorization', `Bearer ${TEST_CI_TOKEN}`));
     if (response.statusCode !== 200) {
         throw new Error(`Expected 200 but got ${response.statusCode}: ${response.body}`);
     }
@@ -192,9 +187,7 @@ async function testValidToken(facade: Facade) {
 async function testHashBasedAuth(facade: Facade) {
     console.log('\nTest: subsequent call with same token (hash-based auth) → 200');
     // First create a build to get a build ID with a stored token hash
-    const createResponse = await facade.request(
-        HttpRequest.POST(`/api/apps/${APP_ID}/builds`).header('authorization', `Bearer ${TEST_CI_TOKEN}`)
-    );
+    const createResponse = await facade.request(HttpRequest.POST(`/api/apps/${APP_ID}/builds`).header('authorization', `Bearer ${TEST_CI_TOKEN}`));
     if (createResponse.statusCode !== 200) {
         throw new Error(`Setup failed: ${createResponse.statusCode}: ${createResponse.body}`);
     }
@@ -202,10 +195,7 @@ async function testHashBasedAuth(facade: Facade) {
 
     // Now call getBuildStatus using the same token — should work via hash matching
     const statusResponse = await facade.request(
-        HttpRequest.GET(`/api/apps/${APP_ID}/builds/${buildId}/status`).header(
-            'authorization',
-            `Bearer ${TEST_CI_TOKEN}`
-        )
+        HttpRequest.GET(`/api/apps/${APP_ID}/builds/${buildId}/status`).header('authorization', `Bearer ${TEST_CI_TOKEN}`)
     );
     if (statusResponse.statusCode !== 200) {
         throw new Error(`Expected 200 but got ${statusResponse.statusCode}: ${statusResponse.body}`);
@@ -216,9 +206,7 @@ async function testHashBasedAuth(facade: Facade) {
 async function testWrongTokenOnSubsequentCall(facade: Facade) {
     console.log('\nTest: subsequent call with wrong token → 401');
     // Create a build first
-    const createResponse = await facade.request(
-        HttpRequest.POST(`/api/apps/${APP_ID}/builds`).header('authorization', `Bearer ${TEST_CI_TOKEN}`)
-    );
+    const createResponse = await facade.request(HttpRequest.POST(`/api/apps/${APP_ID}/builds`).header('authorization', `Bearer ${TEST_CI_TOKEN}`));
     if (createResponse.statusCode !== 200) {
         throw new Error(`Setup failed: ${createResponse.statusCode}: ${createResponse.body}`);
     }
@@ -245,9 +233,7 @@ async function testGitLabJobEndpointDown(facade: Facade) {
         return false;
     };
 
-    const response = await facade.request(
-        HttpRequest.POST(`/api/apps/${APP_ID}/builds`).header('authorization', `Bearer ${TEST_CI_TOKEN}`)
-    );
+    const response = await facade.request(HttpRequest.POST(`/api/apps/${APP_ID}/builds`).header('authorization', `Bearer ${TEST_CI_TOKEN}`));
     mockOverride = null;
 
     if (response.statusCode !== 401) {
@@ -274,9 +260,7 @@ async function testGitLabJobMissingProjectId(facade: Facade) {
         return false;
     };
 
-    const response = await facade.request(
-        HttpRequest.POST(`/api/apps/${APP_ID}/builds`).header('authorization', `Bearer ${TEST_CI_TOKEN}`)
-    );
+    const response = await facade.request(HttpRequest.POST(`/api/apps/${APP_ID}/builds`).header('authorization', `Bearer ${TEST_CI_TOKEN}`));
     mockOverride = null;
 
     if (response.statusCode !== 401) {
@@ -303,9 +287,7 @@ async function testBadVcsIntegration(facade: Facade) {
         name: 'main'
     });
 
-    const response = await facade.request(
-        HttpRequest.POST(`/api/apps/${badVcsAppId}/builds`).header('authorization', `Bearer ${TEST_CI_TOKEN}`)
-    );
+    const response = await facade.request(HttpRequest.POST(`/api/apps/${badVcsAppId}/builds`).header('authorization', `Bearer ${TEST_CI_TOKEN}`));
     if (response.statusCode !== 401) {
         throw new Error(`Expected 401 but got ${response.statusCode}: ${response.body}`);
     }

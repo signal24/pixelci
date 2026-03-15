@@ -1,7 +1,6 @@
-import { fileURLToPath, URL } from 'node:url';
-
 import vue from '@vitejs/plugin-vue';
 import { openapiClientGeneratorPlugin } from '@zyno-io/vue-foundation/vite-plugins';
+import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 // import oxlintPlugin from 'vite-plugin-oxlint';
 

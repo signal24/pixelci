@@ -1,7 +1,6 @@
 import '@fortawesome/fontawesome-free/css/all.css';
 import '@zyno-io/vue-foundation/dist/vue-foundation.css';
 import './openapi-client';
-
 import * as Sentry from '@sentry/vue';
 import { createPinia } from 'pinia';
 import { createApp } from 'vue';
