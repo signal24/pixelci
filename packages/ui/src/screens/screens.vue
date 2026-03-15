@@ -14,13 +14,7 @@
                     <h1>Screens</h1>
                 </div>
 
-                <a
-                    v-if="build && commitUrl"
-                    class="commit-info"
-                    :href="commitUrl"
-                    target="_blank"
-                    v-tooltip="build.commitSubject"
-                >
+                <a v-if="build && commitUrl" class="commit-info" :href="commitUrl" target="_blank" v-tooltip="build.commitSubject">
                     <i class="fa fa-code-commit fa-sm" />
                     <span class="font-mono">{{ build.commitHash?.substring(0, 8) }}</span>
                     <span class="truncate">{{ build.commitSubject }}</span>
@@ -41,21 +35,20 @@
                         <input type="checkbox" v-model="showChanges" data-testid="changes-check" />
                         Show Changes
                     </label>
+
+                    <select v-model="zoomLevel" class="zoom-select" data-testid="zoom-select">
+                        <option v-for="opt in zoomOptions" :key="opt" :value="opt">{{ opt }}%</option>
+                    </select>
                 </div>
             </div>
 
-            <div class="screen-list">
+            <div class="screen-list" :style="{ '--zoom': zoomLevel + '%' }">
                 <div v-for="screen in displayScreens" class="screen">
                     <div class="screen-meta">
                         <span class="screen-name">{{ screen.name }}</span>
-                        <span
-                            v-if="showChanges"
-                            class="screen-status"
-                            :class="getStatusStyle(screen.currentBuildScreen?.status)"
-                            >{{
-                                screen.currentBuildScreen ? getStatusText(screen.currentBuildScreen.status) : 'Removed'
-                            }}</span
-                        >
+                        <span v-if="showChanges" class="screen-status" :class="getStatusStyle(screen.currentBuildScreen?.status)">{{
+                            screen.currentBuildScreen ? getStatusText(screen.currentBuildScreen.status) : 'Removed'
+                        }}</span>
                     </div>
 
                     <div
@@ -77,11 +70,7 @@
                                 </div>
                                 <div v-else-if="screen.referenceBuildScreen?.imageSrc === false" class="error" />
                                 <Loader v-else-if="!screen.referenceBuildScreen?.imageSrc" class="loading" />
-                                <img
-                                    v-else
-                                    :src="screen.referenceBuildScreen?.imageSrc"
-                                    :alt="`Reference screenshot: ${screen.name}`"
-                                />
+                                <img v-else :src="screen.referenceBuildScreen?.imageSrc" :alt="`Reference screenshot: ${screen.name}`" />
                             </div>
 
                             <span class="col-start-2 row-start-1">New Build</span>
@@ -96,11 +85,7 @@
                                 <div class="image-wrapper-inner" :class="{ 'opacity-0': showChanges && showDiff }">
                                     <div v-if="screen.currentBuildScreen?.imageSrc === false" class="error" />
                                     <Loader v-else-if="!screen.currentBuildScreen?.imageSrc" class="loading" />
-                                    <img
-                                        v-else
-                                        :src="screen.currentBuildScreen.imageSrc"
-                                        :alt="`New build screenshot: ${screen.name}`"
-                                    />
+                                    <img v-else :src="screen.currentBuildScreen.imageSrc" :alt="`New build screenshot: ${screen.name}`" />
                                 </div>
 
                                 <div v-if="showChanges && showDiff" class="image-wrapper-inner diff">
@@ -125,6 +110,11 @@
 </template>
 
 <script lang="ts" setup>
+import { dataFrom, dataFromAsync } from '@zyno-io/openapi-client-codegen';
+import { formatError, handleError, handleErrorAndAlert, showAlert, showConfirm } from '@zyno-io/vue-foundation';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+
 import {
     AppsApi,
     BuildScreensApi,
@@ -135,10 +125,6 @@ import {
 } from '@/openapi-client-generated';
 import LoaderModal from '@/shared/components/loader-modal.vue';
 import Loader from '@/shared/components/loader.vue';
-import { dataFrom, dataFromAsync } from '@zyno-io/openapi-client-codegen';
-import { formatError, handleError, handleErrorAndAlert, showAlert, showConfirm } from '@zyno-io/vue-foundation';
-import { computed, onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
 
 const route = useRoute();
 
@@ -160,6 +146,12 @@ const screens = ref<IScreen[]>();
 const loadError = ref<string>();
 const showChanges = ref(true);
 const showDiff = ref(false);
+const zoomOptions = [25, 50, 75, 100];
+
+const zoomStorageKey = `pixelci:zoom:${route.params.id}`;
+const savedZoom = Number(localStorage.getItem(zoomStorageKey));
+const zoomLevel = ref(zoomOptions.includes(savedZoom) ? savedZoom : 100);
+watch(zoomLevel, v => localStorage.setItem(zoomStorageKey, String(v)));
 
 const displayScreens = computed(() => {
     if (showChanges.value) return screens.value;
@@ -174,9 +166,7 @@ const commitUrl = computed(() => {
 });
 
 const hasPendingChanges = computed(() =>
-    screens.value?.some(
-        screen => screen.currentBuildScreen?.status === 'new' || screen.currentBuildScreen?.status === 'needs review'
-    )
+    screens.value?.some(screen => screen.currentBuildScreen?.status === 'new' || screen.currentBuildScreen?.status === 'needs review')
 );
 
 onMounted(load);
@@ -243,8 +233,7 @@ async function getScreenImage(screen: NonNullable<IScreen['currentBuildScreen']>
 }
 
 async function getScreenDiff(screen: IBuildScreenResponse) {
-    if (!screen.currentBuildScreen || !screen.referenceBuildScreen || screen.currentBuildScreen.status === 'no changes')
-        return false;
+    if (!screen.currentBuildScreen || !screen.referenceBuildScreen || screen.currentBuildScreen.status === 'no changes') return false;
 
     try {
         const response = await BuildScreensApi.getBuildScreensGetScreenDiff({
@@ -353,15 +342,20 @@ function getStatusStyle(status?: NonNullable<IBuildScreenResponse['currentBuildS
             }
 
             .image-wrapper {
-                @apply flex items-center justify-center bg-neutral-500/25 rounded-md relative;
+                @apply flex items-start justify-center bg-neutral-500/25 rounded-md relative;
 
                 .image-wrapper-inner.diff {
                     @apply absolute top-0 left-0 w-full h-full;
+
+                    img {
+                        @apply w-full;
+                    }
                 }
             }
 
             img {
-                @apply w-full h-auto rounded-md;
+                @apply h-auto rounded-md;
+                width: var(--zoom);
             }
 
             .placeholder {
@@ -376,6 +370,10 @@ function getStatusStyle(status?: NonNullable<IBuildScreenResponse['currentBuildS
                 @apply flex items-center justify-center bg-neutral-500/25 h-full w-full rounded-md;
             }
         }
+    }
+
+    .zoom-select {
+        @apply text-sm py-1 px-2 cursor-pointer;
     }
 
     .button-wrapper {
