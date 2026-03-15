@@ -1,6 +1,6 @@
-import { S3Client, PutObjectCommand, CreateBucketCommand } from '@aws-sdk/client-s3';
+import { CreateBucketCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import fs from 'fs';
-import mariadb from 'mariadb';
+import * as mariadb from 'mariadb';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
