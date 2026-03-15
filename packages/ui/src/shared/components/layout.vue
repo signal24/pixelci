@@ -5,11 +5,7 @@
                 <a class="title" @click="goHome">PixelCI</a>
             </div>
             <div class="nav-right">
-                <a
-                    class="nav-icon"
-                    @click="toggleTheme"
-                    :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-                >
+                <a class="nav-icon" @click="toggleTheme" :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'">
                     <i :class="isDark ? 'fa fa-sun' : 'fa fa-moon'" />
                 </a>
                 <div v-if="store.isAdmin" class="admin-dropdown">
@@ -123,7 +119,7 @@ nav {
         }
 
         .dropdown-menu {
-            @apply absolute right-0 top-full mt-2 py-1 bg-neutral-800 border border-neutral-500/25 rounded-md shadow-lg min-w-[180px] opacity-0 invisible transition-all duration-100;
+            @apply absolute right-0 top-full z-50 mt-2 py-1 bg-neutral-800 border border-neutral-500/25 rounded-md shadow-lg min-w-[180px] opacity-0 invisible transition-all duration-100;
         }
 
         &:hover .dropdown-menu {
