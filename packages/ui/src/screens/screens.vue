@@ -354,7 +354,7 @@ function getStatusStyle(status?: NonNullable<IBuildScreenResponse['currentBuildS
             }
 
             img {
-                @apply h-auto rounded-md;
+                @apply h-auto rounded-md mx-auto;
                 width: var(--zoom);
             }
 
