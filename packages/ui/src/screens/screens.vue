@@ -346,10 +346,6 @@ function getStatusStyle(status?: NonNullable<IBuildScreenResponse['currentBuildS
 
                 .image-wrapper-inner.diff {
                     @apply absolute top-0 left-0 w-full h-full;
-
-                    img {
-                        @apply w-full;
-                    }
                 }
             }
 
