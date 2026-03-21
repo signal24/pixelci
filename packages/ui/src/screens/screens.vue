@@ -344,8 +344,12 @@ function getStatusStyle(status?: NonNullable<IBuildScreenResponse['currentBuildS
             .image-wrapper {
                 @apply flex items-start justify-center bg-neutral-500/25 rounded-md relative;
 
-                .image-wrapper-inner.diff {
-                    @apply absolute top-0 left-0 w-full h-full;
+                .image-wrapper-inner {
+                    @apply w-full;
+
+                    &.diff {
+                        @apply absolute top-0 left-0 h-full;
+                    }
                 }
             }
 
