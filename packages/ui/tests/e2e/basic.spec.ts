@@ -1,6 +1,17 @@
 import { expect, Page, test } from '@playwright/test';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 const colorSchemes = ['light', 'dark'] as const;
+
+// The review steps below persist approve/reject decisions on the shared seeded build. Reset that
+// state before every test (and retry) so each run starts from the pristine, unreviewed state the
+// clean-state screenshots and image-visibility waits depend on — otherwise the second color scheme
+// would load already-reviewed screens, which render collapsed (image hidden) and fail the run.
+const seedScript = fileURLToPath(new URL('../../../api/tests/scripts/seed-e2e.mjs', import.meta.url));
+test.beforeEach(() => {
+    execFileSync('node', [seedScript, '--reset-reviews'], { stdio: 'inherit' });
+});
 
 colorSchemes.forEach(colorScheme => {
     test.describe(`${colorScheme} mode`, () => {

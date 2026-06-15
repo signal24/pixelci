@@ -50,8 +50,8 @@ const FINDER_2_CHANGED = fs.readFileSync(path.join(fixturesDir, 'finder-2-change
 const FINDER_2_CHANGED_2 = fs.readFileSync(path.join(fixturesDir, 'finder-2-changed-2.png'));
 const FINDER_1_DIFF = fs.readFileSync(path.join(fixturesDir, 'finder-1-diff.png'));
 
-async function seedDatabase() {
-    const conn = await mariadb.createConnection({
+function connect() {
+    return mariadb.createConnection({
         host: process.env.MYSQL_HOST || '127.0.0.1',
         port: parseInt(process.env.MYSQL_PORT || '3306'),
         user: process.env.MYSQL_USER || 'root',
@@ -59,6 +59,22 @@ async function seedDatabase() {
         database: process.env.MYSQL_DATABASE || 'pixelci',
         allowPublicKeyRetrieval: true
     });
+}
+
+// Clears any per-screen review decisions, returning the seeded builds to their pristine
+// (unreviewed) state. E2E tests submit reviews against this shared seed data, so this must
+// run before each test to keep runs isolated.
+async function resetReviews(conn) {
+    await conn.query(
+        `UPDATE builds_screens
+         SET reviewStatus = NULL, reviewComment = NULL, reviewedById = NULL, reviewedAt = NULL
+         WHERE appId = ?`,
+        [APP_ID]
+    );
+}
+
+async function seedDatabase() {
+    const conn = await connect();
 
     // VCS Integration
     await conn.query(
@@ -273,6 +289,10 @@ async function seedDatabase() {
         [BS_02D, APP_ID, BUILD_007_ID, SCREEN_LOGIN_ID, null, null, 'new', 'stored']
     );
 
+    // Make re-seeding idempotent w.r.t. reviews: a persisted local DB may retain decisions
+    // from a prior run, and INSERT IGNORE above won't overwrite them.
+    await resetReviews(conn);
+
     await conn.end();
     console.log('Database seeded.');
 }
@@ -334,6 +354,16 @@ async function seedS3() {
 }
 
 async function main() {
+    // `--reset-reviews` is a fast path used between E2E tests to undo review decisions
+    // without re-running the full seed (DB inserts + S3 uploads).
+    if (process.argv.includes('--reset-reviews')) {
+        const conn = await connect();
+        await resetReviews(conn);
+        await conn.end();
+        console.log('E2E review state reset.');
+        return;
+    }
+
     await seedDatabase();
     await seedS3();
     console.log('E2E seed complete.');
