@@ -45,7 +45,32 @@
             <div class="screen-list" :style="{ '--zoom': zoomLevel + '%' }">
                 <div v-for="screen in displayScreens" class="screen">
                     <div class="screen-meta">
-                        <span class="screen-name">{{ screen.name }}</span>
+                        <div class="flex items-center gap-3 min-w-0">
+                            <button
+                                v-if="needsReview(screen) && screen.currentBuildScreen?.reviewStatus"
+                                class="collapse-toggle"
+                                v-tooltip="isCollapsed(screen) ? 'Expand' : 'Collapse'"
+                                @click="toggleExpanded(screen)"
+                            >
+                                <i class="fa" :class="isCollapsed(screen) ? 'fa-chevron-right' : 'fa-chevron-down'" />
+                            </button>
+
+                            <span class="screen-name">{{ screen.name }}</span>
+
+                            <span
+                                v-if="screen.currentBuildScreen?.reviewStatus"
+                                class="review-badge"
+                                :class="
+                                    screen.currentBuildScreen.reviewStatus === 'approved'
+                                        ? 'bg-green-500/10 border-green-500/50 text-green-500'
+                                        : 'bg-red-500/10 border-red-500/50 text-red-500'
+                                "
+                            >
+                                <i class="fa" :class="screen.currentBuildScreen.reviewStatus === 'approved' ? 'fa-check' : 'fa-xmark'" />
+                                {{ screen.currentBuildScreen.reviewStatus === 'approved' ? 'Approved' : 'Rejected' }}
+                            </span>
+                        </div>
+
                         <span v-if="showChanges" class="screen-status" :class="getStatusStyle(screen.currentBuildScreen?.status)">{{
                             screen.currentBuildScreen ? getStatusText(screen.currentBuildScreen.status) : 'Removed'
                         }}</span>
@@ -58,6 +83,7 @@
                             !screen.referenceBuildScreen ||
                             screen.currentBuildScreen.status !== 'no changes'
                         "
+                        v-show="!isCollapsed(screen)"
                         class="image-wrapper-outer"
                         :class="{ '!grid-cols-1 !grid-rows-1': !showChanges }"
                     >
@@ -99,11 +125,56 @@
                             </template>
                         </div>
                     </div>
+
+                    <div v-if="!isCollapsed(screen) && showChanges && needsReview(screen)" class="review-bar">
+                        <textarea
+                            v-model="screen.reviewCommentDraft"
+                            class="review-comment"
+                            rows="1"
+                            placeholder="Leave a comment (optional)"
+                            :disabled="screen.reviewSubmitting"
+                        />
+
+                        <div class="review-actions">
+                            <button
+                                class="approve"
+                                :class="{ active: screen.currentBuildScreen?.reviewStatus === 'approved' }"
+                                :disabled="screen.reviewSubmitting"
+                                @click="submitReview(screen, 'approved')"
+                            >
+                                Approve
+                            </button>
+                            <button
+                                class="reject"
+                                :class="{ active: screen.currentBuildScreen?.reviewStatus === 'rejected' }"
+                                :disabled="screen.reviewSubmitting"
+                                @click="submitReview(screen, 'rejected')"
+                            >
+                                Reject
+                            </button>
+                        </div>
+                    </div>
+
+                    <div v-if="isCollapsed(screen)" class="collapsed-summary" @click="toggleExpanded(screen)">
+                        <span v-if="screen.currentBuildScreen?.reviewComment" class="comment-preview">
+                            <i class="fa fa-comment fa-sm" />
+                            {{ screen.currentBuildScreen.reviewComment }}
+                        </span>
+                        <span v-else class="comment-preview empty">No comment</span>
+
+                        <span class="expand-hint">
+                            <i class="fa fa-chevron-right fa-sm" />
+                            Expand
+                        </span>
+                    </div>
                 </div>
             </div>
 
             <div v-if="hasPendingChanges" class="button-wrapper">
-                <button class="primary" @click="approveBuild">Approve</button>
+                <span v-if="!allScreensApproved" class="review-progress">
+                    {{ approvedScreenCount }} of {{ reviewableScreens.length }} screens approved
+                </span>
+                <button class="primary" :disabled="!allScreensApproved" @click="approveBuild">Approve</button>
             </div>
         </template>
     </div>
@@ -130,6 +201,9 @@ const route = useRoute();
 
 interface IScreen extends IBuildScreenResponse {
     diffImageSrc?: string | false;
+    reviewCommentDraft?: string;
+    reviewExpanded?: boolean;
+    reviewSubmitting?: boolean;
     currentBuildScreen?: IBuildScreenResponse['currentBuildScreen'] & {
         imageSrc?: string | false;
     };
@@ -169,6 +243,52 @@ const hasPendingChanges = computed(() =>
     screens.value?.some(screen => screen.currentBuildScreen?.status === 'new' || screen.currentBuildScreen?.status === 'needs review')
 );
 
+const reviewableScreens = computed(() => screens.value?.filter(needsReview) ?? []);
+const approvedScreenCount = computed(() => reviewableScreens.value.filter(s => s.currentBuildScreen?.reviewStatus === 'approved').length);
+const allScreensApproved = computed(
+    () => reviewableScreens.value.length > 0 && reviewableScreens.value.every(s => s.currentBuildScreen?.reviewStatus === 'approved')
+);
+
+function needsReview(screen: IScreen) {
+    return screen.currentBuildScreen?.status === 'new' || screen.currentBuildScreen?.status === 'needs review';
+}
+
+function isCollapsed(screen: IScreen) {
+    return needsReview(screen) && !!screen.currentBuildScreen?.reviewStatus && !screen.reviewExpanded;
+}
+
+function toggleExpanded(screen: IScreen) {
+    screen.reviewExpanded = !screen.reviewExpanded;
+}
+
+async function submitReview(screen: IScreen, reviewStatus: 'approved' | 'rejected') {
+    if (!screen.currentBuildScreen) return;
+
+    try {
+        screen.reviewSubmitting = true;
+        const result = await dataFromAsync(
+            BuildScreensApi.postBuildScreensReviewScreen({
+                path: {
+                    appId: String(route.params.id),
+                    id: String(route.params.buildId),
+                    screenId: screen.screenId
+                },
+                body: { reviewStatus, comment: screen.reviewCommentDraft ?? '' }
+            })
+        );
+
+        screen.currentBuildScreen.reviewStatus = result.reviewStatus;
+        screen.currentBuildScreen.reviewComment = result.reviewComment;
+        screen.currentBuildScreen.reviewedById = result.reviewedById;
+        screen.currentBuildScreen.reviewedAt = result.reviewedAt;
+        screen.reviewExpanded = false;
+    } catch (err) {
+        handleErrorAndAlert(err);
+    } finally {
+        screen.reviewSubmitting = false;
+    }
+}
+
 onMounted(load);
 
 async function load() {
@@ -183,6 +303,9 @@ async function load() {
         ]);
 
         screens.value = dataFrom(screensResponse);
+        screens.value?.forEach(screen => {
+            screen.reviewCommentDraft = screen.currentBuildScreen?.reviewComment ?? '';
+        });
         app.value = dataFrom(appResponse);
         build.value = dataFrom(buildResponse);
         loadImages();
@@ -327,10 +450,78 @@ function getStatusStyle(status?: NonNullable<IBuildScreenResponse['currentBuildS
         @apply relative flex flex-col gap-4 p-4 bg-neutral-500/10 border border-neutral-500/25 rounded-md;
 
         .screen-meta {
-            @apply flex justify-between;
+            @apply flex justify-between gap-4;
 
             .screen-status {
-                @apply px-2 py-1 border rounded-md text-sm;
+                @apply px-2 py-1 border rounded-md text-sm whitespace-nowrap;
+            }
+        }
+
+        .collapse-toggle {
+            @apply w-5 shrink-0 text-neutral-400 transition-colors hover:text-neutral-200;
+        }
+
+        .review-badge {
+            @apply flex items-center gap-1.5 px-2 py-1 border rounded-md text-sm whitespace-nowrap;
+        }
+
+        .review-bar {
+            @apply flex items-stretch gap-2 border-t border-neutral-500/25 pt-4;
+
+            .review-comment {
+                @apply flex-1 px-3 py-2 text-sm rounded-md bg-neutral-500/10 border border-neutral-500/25 outline-none;
+                resize: vertical;
+                min-height: 2.5rem;
+
+                &:focus {
+                    @apply border-neutral-500/50;
+                }
+            }
+
+            .review-actions {
+                @apply flex gap-2;
+
+                button {
+                    @apply px-5 rounded-md text-sm font-medium border transition-colors;
+
+                    &.approve {
+                        @apply bg-green-500/10 border-green-500/50 text-green-500;
+
+                        &:hover:not(:disabled),
+                        &.active {
+                            @apply bg-green-500 text-white;
+                        }
+                    }
+
+                    &.reject {
+                        @apply bg-red-500/10 border-red-500/50 text-red-500;
+
+                        &:hover:not(:disabled),
+                        &.active {
+                            @apply bg-red-500 text-white;
+                        }
+                    }
+
+                    &:disabled {
+                        @apply opacity-50 cursor-not-allowed;
+                    }
+                }
+            }
+        }
+
+        .collapsed-summary {
+            @apply flex items-center justify-between gap-4 text-sm text-neutral-400 cursor-pointer border-t border-neutral-500/25 pt-4;
+
+            .comment-preview {
+                @apply truncate;
+
+                &.empty {
+                    @apply italic text-neutral-500;
+                }
+            }
+
+            .expand-hint {
+                @apply text-neutral-500 whitespace-nowrap;
             }
         }
 
@@ -377,7 +568,15 @@ function getStatusStyle(status?: NonNullable<IBuildScreenResponse['currentBuildS
     }
 
     .button-wrapper {
-        @apply py-4 flex gap-4 justify-end;
+        @apply py-4 flex gap-4 items-center justify-end;
+
+        .review-progress {
+            @apply text-sm text-neutral-400;
+        }
+
+        button:disabled {
+            @apply opacity-50 cursor-not-allowed;
+        }
     }
 }
 </style>

@@ -62,6 +62,12 @@ function startMockGitLab(): Promise<number> {
                 return;
             }
 
+            if (req.url?.startsWith('/api/v4/projects/')) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ id: 1, path_with_namespace: PROJECT_PATH }));
+                return;
+            }
+
             res.writeHead(404);
             res.end('Not found');
         });
@@ -98,7 +104,13 @@ async function createBaseEntities(mockGitLabPort: number) {
         lastLoginAt: new Date(),
         isAdmin: true,
         vcsId: ZERO_ID,
-        vcsUserId: ZERO_ID
+        vcsUserId: ZERO_ID,
+        vcsSession: {
+            accessToken: 'test-access-token',
+            expiresAt: Date.now() + 60 * 60 * 1000,
+            refreshToken: 'test-refresh-token',
+            redirectUri: 'http://localhost'
+        }
     });
 
     await createPersistedEntity(VcsIntegrationEntity, {
@@ -148,10 +160,11 @@ async function runScenario(facade: TestingFacade, scenarioId: string, scenario: 
     const buildId = buildResponse.id;
 
     const expectedStatuses: Record<string, BuildScreenEntity['status']> = {};
+    const screensToReview: string[] = [];
 
     for (const [index, screen] of Object.entries(scenario.screens)) {
         console.log(`Uploading screen ${Number(index) + 1} of ${scenario.screens.length}...`);
-        const screenResponse = await makeRequest<{ id: string }>(
+        const screenResponse = await makeRequest<{ id: string; screenId: string }>(
             facade,
             HttpRequest.POST(`/api/apps/${APP_ID}/builds/${buildId}/screens`)
                 .header('authorization', `Bearer ${TEST_CI_TOKEN}`)
@@ -164,6 +177,9 @@ async function runScenario(facade: TestingFacade, scenarioId: string, scenario: 
                 ])
         );
         expectedStatuses[screenResponse.id] = screen.expectedStatus;
+        if (screen.expectedStatus === 'new' || screen.expectedStatus === 'needs review') {
+            screensToReview.push(screenResponse.screenId);
+        }
     }
 
     console.log('Processing build...');
@@ -201,6 +217,17 @@ async function runScenario(facade: TestingFacade, scenarioId: string, scenario: 
 
     if (scenario.shouldApprove) {
         const jwt = await JWT.generate({ subject: ZERO_ID });
+
+        // per-screen approval is now required before a build can be approved
+        for (const screenId of screensToReview) {
+            await makeRequest<{ reviewStatus: string }>(
+                facade,
+                HttpRequest.POST(`/api/apps/${APP_ID}/builds/${buildId}/screens/${screenId}/review`)
+                    .header('authorization', `Bearer ${jwt}`)
+                    .json({ reviewStatus: 'approved', comment: '' })
+            );
+        }
+
         console.log('Approving build...');
         await makeRequest<{ vcsUrl: string }>(
             facade,

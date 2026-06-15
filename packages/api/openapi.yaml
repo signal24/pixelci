@@ -527,6 +527,51 @@ paths:
           content:
             application/json:
               schema: {}
+  /api/apps/{appId}/builds/{id}/screens/{screenId}/review:
+    post:
+      tags:
+        - buildScreens
+      operationId: postBuildScreensReviewScreen
+      parameters:
+        - in: path
+          name: appId
+          schema:
+            type: string
+          required: true
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+        - in: path
+          name: screenId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reviewStatus:
+                  type: string
+                  enum:
+                    - approved
+                    - rejected
+                comment:
+                  type: string
+              required:
+                - reviewStatus
+                - comment
+        required: true
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IBuildScreenReviewResponse"
   /api/admin/vcs-integrations:
     get:
       tags:
@@ -661,6 +706,105 @@ paths:
                 required:
                   - id
                   - isAdmin
+  /api/ext/apps:
+    get:
+      tags:
+        - externalRead
+      operationId: getExternalReadListApps
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/IExtAppResponse"
+  /api/ext/apps/{appId}/builds:
+    get:
+      tags:
+        - externalRead
+      operationId: getExternalReadListBuilds
+      parameters:
+        - in: path
+          name: appId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: branchId
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: number
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/IExtBuildResponse"
+  /api/ext/apps/{appId}/builds/{buildId}:
+    get:
+      tags:
+        - externalRead
+      operationId: getExternalReadGetBuild
+      parameters:
+        - in: path
+          name: appId
+          schema:
+            type: string
+          required: true
+        - in: path
+          name: buildId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IExtBuildDetailResponse"
+  /api/ext/apps/{appId}/builds/{buildId}/screens/{screenId}/image:
+    get:
+      tags:
+        - externalRead
+      operationId: getExternalReadGetScreenImage
+      parameters:
+        - in: path
+          name: appId
+          schema:
+            type: string
+          required: true
+        - in: path
+          name: buildId
+          schema:
+            type: string
+          required: true
+        - in: path
+          name: screenId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: kind
+          schema:
+            type: string
+            enum:
+              - new
+              - diff
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema: {}
   /healthz:
     get:
       tags:
@@ -958,6 +1102,22 @@ components:
             - changes approved
             - null
           nullable: true
+        reviewStatus:
+          type: string
+          enum:
+            - approved
+            - rejected
+            - null
+          nullable: true
+        reviewComment:
+          nullable: true
+          type: string
+        reviewedById:
+          nullable: true
+          type: string
+        reviewedAt:
+          nullable: true
+          type: string
       required:
         - id
         - buildId
@@ -965,6 +1125,10 @@ components:
         - approvalBuildId
         - screenId
         - status
+        - reviewStatus
+        - reviewComment
+        - reviewedById
+        - reviewedAt
     IBuildScreenResponse:
       type: object
       properties:
@@ -1027,6 +1191,30 @@ components:
         - screenId
         - status
         - name
+    IBuildScreenReviewResponse:
+      type: object
+      properties:
+        reviewStatus:
+          type: string
+          enum:
+            - approved
+            - rejected
+            - null
+          nullable: true
+        reviewComment:
+          nullable: true
+          type: string
+        reviewedById:
+          nullable: true
+          type: string
+        reviewedAt:
+          nullable: true
+          type: string
+      required:
+        - reviewStatus
+        - reviewComment
+        - reviewedById
+        - reviewedAt
     IVcsIntegrationListResponse:
       type: object
       properties:
@@ -1126,3 +1314,140 @@ components:
           type: boolean
       required:
         - isAdmin
+    IExtAppResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
+    IExtBuildResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        branchName:
+          type: string
+        commitHash:
+          type: string
+        commitSubject:
+          type: string
+        commitAuthor:
+          type: string
+        status:
+          type: string
+          enum:
+            - draft
+            - processing
+            - no changes
+            - needs review
+            - changes approved
+            - canceled
+            - failed
+        createdAt:
+          type: string
+        approvedByName:
+          nullable: true
+          type: string
+        approvedAt:
+          nullable: true
+          type: string
+      required:
+        - id
+        - branchName
+        - commitHash
+        - commitSubject
+        - commitAuthor
+        - status
+        - createdAt
+        - approvedByName
+        - approvedAt
+    IExtBuildScreenResponse:
+      type: object
+      properties:
+        screenId:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum:
+            - new
+            - no changes
+            - needs review
+            - changes approved
+            - null
+          nullable: true
+        reviewStatus:
+          type: string
+          enum:
+            - approved
+            - rejected
+            - null
+          nullable: true
+        reviewComment:
+          nullable: true
+          type: string
+        reviewedByName:
+          nullable: true
+          type: string
+        reviewedAt:
+          nullable: true
+          type: string
+      required:
+        - screenId
+        - name
+        - status
+        - reviewStatus
+        - reviewComment
+        - reviewedByName
+        - reviewedAt
+    IExtBuildDetailResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        branchName:
+          type: string
+        commitHash:
+          type: string
+        commitSubject:
+          type: string
+        commitAuthor:
+          type: string
+        status:
+          type: string
+          enum:
+            - draft
+            - processing
+            - no changes
+            - needs review
+            - changes approved
+            - canceled
+            - failed
+        createdAt:
+          type: string
+        approvedByName:
+          nullable: true
+          type: string
+        approvedAt:
+          nullable: true
+          type: string
+        screens:
+          type: array
+          items:
+            $ref: "#/components/schemas/IExtBuildScreenResponse"
+      required:
+        - id
+        - branchName
+        - commitHash
+        - commitSubject
+        - commitAuthor
+        - status
+        - createdAt
+        - approvedByName
+        - approvedAt
+        - screens

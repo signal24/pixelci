@@ -9,6 +9,7 @@ import { BranchEntity } from '../entities/Branch.entity';
 import { BuildEntity } from '../entities/Build.entity';
 import { UserEntity } from '../entities/User.entity';
 import { IGitLabConfig, VcsIntegrationEntity } from '../entities/VcsIntegration.entity';
+import { AppAccessService } from '../services/AppAccess.service';
 import { IVcsProject, VcsService } from '../services/Vcs.service';
 
 export type IAppIndexResponse = Partial<Pick<AppEntity, 'id' | 'defaultBranchId' | 'name'> & { buildCount: number }>;
@@ -27,14 +28,18 @@ export type IAppUpdateInput = Partial<Pick<AppEntity, 'name' | 'defaultBranchId'
 @ApiController('/api/apps')
 @http.middleware(UserAuthMiddleware)
 export class AppsController {
-    constructor(private vcsService: VcsService) {}
+    constructor(
+        private vcsService: VcsService,
+        private appAccessSvc: AppAccessService
+    ) {}
 
     @http.GET()
-    async index(): Promise<IAppIndexResponse[]> {
+    async index(user: UserEntity): Promise<IAppIndexResponse[]> {
         const apps = await AppEntity.query().filter({ deletedAt: null }).find();
+        const accessibleApps = await this.appAccessSvc.filterAccessible({ kind: 'user', user }, apps);
 
         const appsWithBuildCount: IAppIndexResponse[] = await Promise.all(
-            apps.map(async app => {
+            accessibleApps.map(async app => {
                 const count = await BuildEntity.query().filter({ appId: app.id }).count();
 
                 return {
@@ -49,9 +54,10 @@ export class AppsController {
     }
 
     @http.GET('/:id')
-    async show(id: string): Promise<IAppShowResponse> {
+    async show(id: string, user: UserEntity): Promise<IAppShowResponse> {
         const app = await AppEntity.query().filter({ id, deletedAt: null }).findOneOrUndefined();
         if (!app) throw new HttpNotFoundError();
+        await this.appAccessSvc.assertCanAccess({ kind: 'user', user }, app);
 
         let commitUrlBase: string | null = null;
         const vcs = await VcsIntegrationEntity.query().filterField('id', app.vcsId).findOneOrUndefined();

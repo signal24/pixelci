@@ -187,6 +187,62 @@ export class ProcessBuildJob extends BaseJob<IProcessBuildJobData> {
             screen.currentBuildScreen.status = 'needs review';
         }
 
+        // carry forward prior per-screen review decisions: when a same-named screen was individually
+        // approved/rejected since this branch's last approval and the current image still matches it,
+        // re-apply that decision (and comment) so reviewers don't re-review unchanged screens build after build.
+        // NOTE: the lower bound is this branch's last approval, but candidates are matched app-wide (across
+        // branches) by screenId, since builds_screens has no branchId. Carry-forward only fires on an exact
+        // pixel match, so a cross-branch decision is only inherited when the screen is visually identical.
+        const reviewWindowLowerBoundId = previousBuild?.id ?? referenceBuild?.id;
+
+        for (const screen of screens) {
+            if (screen.currentBuildScreen.status !== 'needs review' && screen.currentBuildScreen.status !== 'new') continue;
+
+            const priorReviewedScreens = await BuildScreenEntity.query()
+                .filter({
+                    appId,
+                    screenId: screen.screenId,
+                    reviewStatus: { $ne: null },
+                    buildId: { $ne: currentBuild.id },
+                    ...(reviewWindowLowerBoundId && { id: { $gt: reviewWindowLowerBoundId } })
+                })
+                .orderBy('id', 'desc')
+                .find();
+
+            for (const priorReviewedScreen of priorReviewedScreens) {
+                let isMatch: boolean;
+                try {
+                    isMatch = await this.screensMatch(
+                        appId,
+                        priorReviewedScreen.matchedBuildId ?? priorReviewedScreen.buildId,
+                        currentBuild.id,
+                        screen.screenId,
+                        diffThreshold
+                    );
+                } catch (err) {
+                    logger.info('Failed to compare against prior reviewed screen; skipping candidate', {
+                        screenId: screen.screenId,
+                        priorBuildId: priorReviewedScreen.buildId,
+                        error: (err as Error).message
+                    });
+                    continue;
+                }
+
+                if (!isMatch) continue;
+
+                logger.info('Carrying forward prior review decision for unchanged screen', {
+                    screenId: screen.screenId,
+                    reviewStatus: priorReviewedScreen.reviewStatus,
+                    fromBuildId: priorReviewedScreen.buildId
+                });
+                screen.currentBuildScreen.reviewStatus = priorReviewedScreen.reviewStatus;
+                screen.currentBuildScreen.reviewComment = priorReviewedScreen.reviewComment;
+                screen.currentBuildScreen.reviewedById = priorReviewedScreen.reviewedById;
+                screen.currentBuildScreen.reviewedAt = priorReviewedScreen.reviewedAt;
+                break;
+            }
+        }
+
         // there no no changes if all screens are accounted for and have no changes
         if (screens.every(screen => screen.currentBuildScreen.status === 'no changes')) {
             currentBuild.status = 'no changes';
@@ -218,12 +274,16 @@ export class ProcessBuildJob extends BaseJob<IProcessBuildJobData> {
         });
     }
 
+    private async loadAndDiff(appId: string, leftBuildId: string, rightBuildId: string, screenId: string) {
+        const leftScreenData = await this.s3Svc.getBuffer(this.s3Svc.getPathForScreen(appId, leftBuildId, screenId));
+        const rightScreenData = await this.s3Svc.getBuffer(this.s3Svc.getPathForScreen(appId, rightBuildId, screenId));
+        return this.pixelMatch.getDiff(leftScreenData, rightScreenData, this.appConfig.DEFAULT_PIXEL_MATCH_THRESHOLD);
+    }
+
     private async performDiff(appId: string, leftBuildId: string, rightBuildId: string, screenId: string, diffThreshold: number) {
         this.logger.info('Performing diff', { leftBuildId, rightBuildId, screenId });
 
-        const leftScreenData = await this.s3Svc.getBuffer(this.s3Svc.getPathForScreen(appId, leftBuildId, screenId));
-        const rightScreenData = await this.s3Svc.getBuffer(this.s3Svc.getPathForScreen(appId, rightBuildId, screenId));
-        const { getDiffPng, diffPct } = await this.pixelMatch.getDiff(leftScreenData, rightScreenData, this.appConfig.DEFAULT_PIXEL_MATCH_THRESHOLD);
+        const { getDiffPng, diffPct } = await this.loadAndDiff(appId, leftBuildId, rightBuildId, screenId);
 
         if (diffPct > diffThreshold) {
             this.logger.info('Diff exceeds threshold. Storing diff.', { diffPct, diffThreshold });
@@ -233,5 +293,12 @@ export class ProcessBuildJob extends BaseJob<IProcessBuildJobData> {
         }
 
         return true;
+    }
+
+    // like performDiff, but only reports whether two screens match without storing a diff image,
+    // so it can be used for speculative comparisons without clobbering the stored reference diff
+    private async screensMatch(appId: string, leftBuildId: string, rightBuildId: string, screenId: string, diffThreshold: number) {
+        const { diffPct } = await this.loadAndDiff(appId, leftBuildId, rightBuildId, screenId);
+        return diffPct <= diffThreshold;
     }
 }

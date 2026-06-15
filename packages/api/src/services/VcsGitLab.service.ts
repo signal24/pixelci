@@ -152,6 +152,36 @@ export class VcsGitLabService implements IVcsServiceImpl {
         };
     }
 
+    async userCanAccessProject(user: UserEntity, projectIdentifier: string): Promise<boolean> {
+        if (!user.vcsSession) return false;
+
+        try {
+            await this.renewToken(user);
+        } catch (err) {
+            this.logger.warn('Token renewal failed during project access check', { userId: user.id, error: String(err) });
+            return false;
+        }
+
+        return this.checkProjectAccess(user.vcsSession.accessToken, projectIdentifier);
+    }
+
+    async tokenCanAccessProject(token: string, projectIdentifier: string): Promise<boolean> {
+        return this.checkProjectAccess(token, projectIdentifier);
+    }
+
+    private async checkProjectAccess(token: string, projectIdentifier: string): Promise<boolean> {
+        try {
+            const response = await axios.get(`${this.config.url}/api/v4/projects/${encodeURIComponent(projectIdentifier)}`, {
+                headers: { Authorization: `Bearer ${token}` },
+                validateStatus: status => status === 200 || status === 401 || status === 403 || status === 404
+            });
+            return response.status === 200;
+        } catch (err) {
+            this.logger.warn('Project access check request failed', { projectIdentifier, error: String(err) });
+            return false;
+        }
+    }
+
     private async renewToken(user: UserEntity): Promise<void> {
         if (user.vcsSession!.expiresAt > Date.now() - 60_000) return;
 

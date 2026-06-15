@@ -11,4 +11,8 @@ export class BuildScreenEntity extends BaseEntity {
     approvalBuildId!: UuidString | null; // when a screen is previously approved, we point to the build that approved it
     status!: 'new' | 'no changes' | 'needs review' | 'changes approved' | null;
     storageStatus!: 'stored' | 'pendingDeletion' | null;
+    reviewStatus!: 'approved' | 'rejected' | null; // per-screen reviewer decision while a build is being reviewed
+    reviewComment!: string | null;
+    reviewedById!: UuidString | null;
+    reviewedAt!: Date | null;
 }

@@ -13,6 +13,7 @@ import { BuildEntity } from '../entities/Build.entity';
 import { BuildScreenEntity } from '../entities/BuildScreen.entity';
 import { UserEntity } from '../entities/User.entity';
 import { ProcessBuildJob } from '../jobs/ProcessBuild.job';
+import { AppAccessService } from '../services/AppAccess.service';
 import { VcsService } from '../services/Vcs.service';
 
 type IBuildResponse = Pick<BuildEntity, 'id' | 'branchId' | 'commitHash' | 'commitSubject' | 'commitAuthor' | 'createdAt' | 'status'> & {
@@ -29,14 +30,14 @@ export class BuildsController {
         private workerSvc: WorkerService,
         private vcsSvc: VcsService,
         private db: DB,
-        private logger: ScopedLogger
+        private logger: ScopedLogger,
+        private appAccessSvc: AppAccessService
     ) {}
 
     @http.GET()
     @http.middleware(UserAuthMiddleware)
-    async index(appId: string, query: HttpQueries<{ branchId?: string }>): Promise<IBuildResponse[]> {
-        const app = await AppEntity.query().filter({ id: appId }).findOneOrUndefined();
-        if (!app) throw new HttpNotFoundError();
+    async index(appId: string, user: UserEntity, query: HttpQueries<{ branchId?: string }>): Promise<IBuildResponse[]> {
+        await this.appAccessSvc.assertCanAccessAppId({ kind: 'user', user }, appId);
 
         const { branchId } = query;
 
@@ -64,7 +65,9 @@ export class BuildsController {
 
     @http.GET(':id')
     @http.middleware(UserAuthMiddleware)
-    async get(appId: string, id: string): Promise<IBuildResponse> {
+    async get(appId: string, id: string, user: UserEntity): Promise<IBuildResponse> {
+        await this.appAccessSvc.assertCanAccessAppId({ kind: 'user', user }, appId);
+
         const build = await BuildEntity.query().filter({ id, appId }).findOneOrUndefined();
         if (!build) throw new HttpNotFoundError();
 
@@ -192,6 +195,7 @@ export class BuildsController {
     async approve(user: UserEntity, appId: string, id: string): Promise<IBuildApprovalResponse> {
         const build = await BuildEntity.query().filter({ id, appId }).findOneOrUndefined();
         if (!build) throw new HttpNotFoundError();
+        await this.appAccessSvc.assertCanAccessAppId({ kind: 'user', user }, appId);
         if (build.status !== 'needs review') throw new HttpBadRequestError('Build is not in needs review status');
 
         await this.db.transaction(async txn => {
@@ -199,6 +203,12 @@ export class BuildsController {
                 .query(BuildScreenEntity)
                 .filter({ appId, buildId: id, status: { $ne: 'no changes' } })
                 .find();
+
+            const unapproved = buildScreens.filter(
+                buildScreen => (buildScreen.status === 'new' || buildScreen.status === 'needs review') && buildScreen.reviewStatus !== 'approved'
+            );
+            if (unapproved.length) throw new HttpBadRequestError('All changed screens must be approved before the build can be approved');
+
             buildScreens.forEach(buildScreen => {
                 buildScreen.status = 'changes approved';
                 txn.add(buildScreen);

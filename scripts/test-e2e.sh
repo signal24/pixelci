@@ -3,6 +3,9 @@ set -e
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
+# E2E seeds a fake user/app and has no reachable VCS provider, so skip GitLab project-access gating.
+export ENFORCE_VCS_PROJECT_ACCESS=false
+
 API_PID=""
 
 cleanup() {

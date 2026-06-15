@@ -23,6 +23,8 @@ export interface IVcsServiceImpl {
     getProjectPath(user: UserEntity, projectPath: string): Promise<string>;
     searchProjects(user: UserEntity, search: string): Promise<IVcsProject[]>;
     getProjectByPath(user: UserEntity, projectPath: string): Promise<IVcsProject>;
+    userCanAccessProject(user: UserEntity, projectIdentifier: string): Promise<boolean>;
+    tokenCanAccessProject(token: string, projectIdentifier: string): Promise<boolean>;
 }
 
 export class VcsService {
@@ -48,6 +50,14 @@ export class VcsService {
 
     async getProjectByPath(user: UserEntity, vcsId: string, projectPath: string): Promise<IVcsProject> {
         return this.runWithProvider(vcsId, provider => provider.getProjectByPath(user, projectPath));
+    }
+
+    async userCanAccessProject(user: UserEntity, vcsId: string, projectIdentifier: string): Promise<boolean> {
+        return this.runWithProvider(vcsId, provider => provider.userCanAccessProject(user, projectIdentifier));
+    }
+
+    async tokenCanAccessProject(token: string, vcsId: string, projectIdentifier: string): Promise<boolean> {
+        return this.runWithProvider(vcsId, provider => provider.tokenCanAccessProject(token, projectIdentifier));
     }
 
     // eslint-disable-next-line no-explicit-any

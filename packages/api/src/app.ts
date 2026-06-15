@@ -1,19 +1,21 @@
 import { createApp, CreateAppOptions } from '@zyno-io/dk-server-foundation';
 import { compact } from 'lodash';
 
-import { AdminAuthMiddleware, BuildCiTokenMiddleware, UserAuthMiddleware } from './accessories/AuthMiddleware.accessory';
+import { AdminAuthMiddleware, BuildCiTokenMiddleware, UserAuthMiddleware, VcsTokenAuthMiddleware } from './accessories/AuthMiddleware.accessory';
 import { UserResolver } from './accessories/Controller.accessory';
 import { AppConfig } from './config';
 import { AppsController } from './controllers/Apps.controller';
 import { BranchesController } from './controllers/Branches.controller';
 import { BuildsController } from './controllers/Builds.controller';
 import { BuildScreensController } from './controllers/BuildScreens.controller';
+import { ExternalReadController } from './controllers/ExternalRead.controller';
 import { SessionController } from './controllers/Session.controller';
 import { UsersController } from './controllers/Users.controller';
 import { VcsIntegrationsController } from './controllers/VcsIntegrations.controller';
 import { DB } from './database';
 import { ProcessBuildJob } from './jobs/ProcessBuild.job';
 import { StaticContentListener } from './listener';
+import { AppAccessService } from './services/AppAccess.service';
 import { PixelMatchService } from './services/PixelMatch.service';
 import { S3Service } from './services/S3.service';
 import { VcsService } from './services/Vcs.service';
@@ -36,16 +38,19 @@ export const CoreAppOptions: CreateAppOptions<AppConfig> = {
         BuildsController,
         BuildScreensController,
         VcsIntegrationsController,
-        UsersController
+        UsersController,
+        ExternalReadController
     ],
     providers: [
         UserResolver,
         AdminAuthMiddleware,
         BuildCiTokenMiddleware,
         UserAuthMiddleware,
+        VcsTokenAuthMiddleware,
         ProcessBuildJob,
         PixelMatchService,
         VcsService,
+        AppAccessService,
         S3Service
     ],
     listeners: [StaticContentListener]
