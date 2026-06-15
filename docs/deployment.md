@@ -38,7 +38,7 @@ Setting `ENABLE_JOB_RUNNER=true` makes the server also process build comparison 
 **2. Run database migrations**
 
 ```bash
-docker exec pixelci node . migration:run
+docker exec pixelci node . migrate:run
 ```
 
 **3. Access the web interface**
@@ -105,7 +105,7 @@ After starting:
 
 ```bash
 docker compose up -d
-docker compose exec pixelci node . migration:run
+docker compose exec pixelci node . migrate:run
 ```
 
 Then visit `http://localhost:7924`. The onboarding wizard will guide you through initial setup.
@@ -116,13 +116,13 @@ Migrations must be run whenever you deploy a new version:
 
 ```bash
 # Docker
-docker exec pixelci node . migration:run
+docker exec pixelci node . migrate:run
 
 # Docker Compose
-docker compose exec pixelci node . migration:run
+docker compose exec pixelci node . migrate:run
 
 # Kubernetes
-kubectl exec deploy/pixelci-server -- node . migration:run
+kubectl exec deploy/pixelci-server -- node . migrate:run
 ```
 
 ## Environment Variable Reference
@@ -237,7 +237,7 @@ For Kubernetes deployments, you can either:
 Run migrations via `kubectl exec` against the server deployment after each upgrade:
 
 ```bash
-kubectl exec deploy/pixelci-server -- node . migration:run
+kubectl exec deploy/pixelci-server -- node . migrate:run
 ```
 
 All deployments share the same environment variables. Use Kubernetes Secrets for sensitive values (`AUTH_JWT_SECRET`, `MYSQL_PASSWORD_SECRET`, S3 credentials).

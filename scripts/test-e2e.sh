@@ -20,7 +20,7 @@ cd "$ROOT_DIR/packages/api"
 yarn build
 
 echo "==> Running migrations..."
-APP_ENV=development node dist/src/index.js migration:run
+APP_ENV=development node dist/src/index.js migrate:run
 
 echo "==> Seeding E2E test data..."
 node tests/scripts/seed-e2e.mjs

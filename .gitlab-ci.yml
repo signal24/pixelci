@@ -174,7 +174,7 @@ deploy:
   script: |
     kubectl -n pixelci rollout restart deployment pixelci
     kubectl -n pixelci rollout status deployment pixelci
-    kubectl -n pixelci exec deployment/pixelci -- node . migration:run
+    kubectl -n pixelci exec deployment/pixelci -- node . migrate:run
     kubectl -n pixelci rollout restart deployment pixelci-worker
 
 mirror:

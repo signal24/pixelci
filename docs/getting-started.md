@@ -40,7 +40,7 @@ docker run -d \
 Then run migrations:
 
 ```bash
-docker exec pixelci node . migration:run
+docker exec pixelci node . migrate:run
 ```
 
 See the [Deployment Guide](./deployment.md) for Docker Compose, Kubernetes, and full configuration reference.
