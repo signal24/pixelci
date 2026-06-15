@@ -89,7 +89,6 @@ async function loadSession() {
         if (route.path === '/login') {
             router.replace(targetPath.value ?? '/');
         }
-        return;
     } catch (err) {
         if (!(err instanceof OpenApiError && err.response.status === 401)) {
             return handleErrorAndAlert(err);
@@ -100,11 +99,6 @@ async function loadSession() {
         providers.value = await dataFromAsync(SessionApi.getSessionGetProviders());
     } catch (err) {
         return handleErrorAndAlert(err);
-    }
-
-    // with a single provider, skip the picker and go straight to it
-    if (providers.value.length === 1) {
-        return login(providers.value[0]);
     }
 
     isLoading.value = false;
