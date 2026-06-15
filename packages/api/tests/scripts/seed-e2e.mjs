@@ -56,7 +56,8 @@ async function seedDatabase() {
         port: parseInt(process.env.MYSQL_PORT || '3306'),
         user: process.env.MYSQL_USER || 'root',
         password: process.env.MYSQL_PASSWORD_SECRET || 'secret',
-        database: process.env.MYSQL_DATABASE || 'pixelci'
+        database: process.env.MYSQL_DATABASE || 'pixelci',
+        allowPublicKeyRetrieval: true
     });
 
     // VCS Integration

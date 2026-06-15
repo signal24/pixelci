@@ -22,9 +22,9 @@
         "docs:preview": "vitepress preview docs"
     },
     "devDependencies": {
-        "lefthook": "^2.1.9",
-        "oxfmt": "^0.54.0",
-        "oxlint": "^1.69.0",
+        "lefthook": "^2.1.4",
+        "oxfmt": "^0.40.0",
+        "oxlint": "^1.55.0",
         "vitepress": "^1.6.4"
     },
     "packageManager": "yarn@4.13.0"
