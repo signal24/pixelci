@@ -139,10 +139,16 @@ build:canary:
       when: never
     - if: $CI_COMMIT_BRANCH == "main"
   script: |
+    BUILD_VERSION=${CI_PIPELINE_CREATED_AT:2:2}.${CI_PIPELINE_CREATED_AT:5:2}${CI_PIPELINE_CREATED_AT:8:2}.${CI_PIPELINE_CREATED_AT:11:2}${CI_PIPELINE_CREATED_AT:14:2}
+    BUILD_VERSION=$(echo -n ${BUILD_VERSION} | sed -E 's/\.0+/./g')
+    BUILD_TAG=${BUILD_VERSION}-${CI_COMMIT_SHORT_SHA}
+    echo "Build tag: ${BUILD_TAG}"
     buildah bud \
       -t ${CI_REGISTRY_IMAGE}:canary \
+      -t ${CI_REGISTRY_IMAGE}:${BUILD_TAG} \
       .
     buildah push ${CI_REGISTRY_IMAGE}:canary
+    buildah push ${CI_REGISTRY_IMAGE}:${BUILD_TAG}
 
 build:canary:cli:
   extends: .build-base
@@ -151,11 +157,17 @@ build:canary:cli:
       when: never
     - if: $CI_COMMIT_BRANCH == "main"
   script: |
+    BUILD_VERSION=${CI_PIPELINE_CREATED_AT:2:2}.${CI_PIPELINE_CREATED_AT:5:2}${CI_PIPELINE_CREATED_AT:8:2}.${CI_PIPELINE_CREATED_AT:11:2}${CI_PIPELINE_CREATED_AT:14:2}
+    BUILD_VERSION=$(echo -n ${BUILD_VERSION} | sed -E 's/\.0+/./g')
+    BUILD_TAG=${BUILD_VERSION}-${CI_COMMIT_SHORT_SHA}
+    echo "Build tag: ${BUILD_TAG}"
     buildah bud \
       -f Dockerfile.cli \
       -t ${CI_REGISTRY_IMAGE}/cli:canary \
+      -t ${CI_REGISTRY_IMAGE}/cli:${BUILD_TAG} \
       .
     buildah push ${CI_REGISTRY_IMAGE}/cli:canary
+    buildah push ${CI_REGISTRY_IMAGE}/cli:${BUILD_TAG}
 
 deploy:
   stage: deploy
@@ -166,16 +178,18 @@ deploy:
     - if: $CI_COMMIT_TITLE =~ /^v\d+\.\d+\.\d+$/
       when: never
     - if: $CI_COMMIT_BRANCH == "main"
-  tags:
-    - clusterwide
-    - s24-ova-devops-k3s-0
-  image:
-    name: bitnami/kubectl:latest
-  script: |
-    kubectl -n pixelci rollout restart deployment pixelci
-    kubectl -n pixelci rollout status deployment pixelci
-    kubectl -n pixelci exec deployment/pixelci -- node . migrate:run
-    kubectl -n pixelci rollout restart deployment pixelci-worker
+  image: ghcr.io/zyno-io/dag/cli:latest
+  script:
+    - |
+      BUILD_VERSION=${CI_PIPELINE_CREATED_AT:2:2}.${CI_PIPELINE_CREATED_AT:5:2}${CI_PIPELINE_CREATED_AT:8:2}.${CI_PIPELINE_CREATED_AT:11:2}${CI_PIPELINE_CREATED_AT:14:2}
+      BUILD_VERSION=$(echo -n ${BUILD_VERSION} | sed -E 's/\.0+/./g')
+      echo "Build version: ${BUILD_VERSION}"
+    - cd resources/helm/chart
+    - dag-deploy .
+      --server ${DAG_SERVER_URL}
+      --deploy-version $BUILD_VERSION
+      --set version=${BUILD_VERSION}
+      --set image=${CI_REGISTRY_IMAGE}:${BUILD_VERSION}-${CI_COMMIT_SHORT_SHA}
 
 mirror:
   stage: mirror

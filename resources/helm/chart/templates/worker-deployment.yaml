@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-worker
+  labels:
+    app: {{ .Release.Name }}
+    role: worker
+spec:
+  replicas: {{ .Values.worker.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      role: worker
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        role: worker
+        version: "{{ .Values.version }}"
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Release.Name }}-worker
+          image: {{ .Values.image }}
+          imagePullPolicy: IfNotPresent
+          args: ["node", ".", "worker:start"]
+          envFrom:
+            - secretRef:
+                name: {{ .Values.secret.name | default .Release.Name }}
+          env:
+            {{- range $k, $v := .Values.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 7924
+            timeoutSeconds: 3
+            periodSeconds: 5
+            failureThreshold: 3
