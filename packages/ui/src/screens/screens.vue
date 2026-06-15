@@ -458,7 +458,11 @@ function getStatusStyle(status?: NonNullable<IBuildScreenResponse['currentBuildS
         }
 
         .collapse-toggle {
-            @apply w-5 shrink-0 text-neutral-400 transition-colors hover:text-neutral-200;
+            @apply w-5 shrink-0 p-0 border-0 bg-transparent text-neutral-400 transition-colors hover:text-neutral-200;
+
+            &:hover {
+                @apply bg-transparent;
+            }
         }
 
         .review-badge {

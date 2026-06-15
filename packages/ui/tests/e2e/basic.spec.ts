@@ -8,6 +8,15 @@ colorSchemes.forEach(colorScheme => {
 
         const takeScreenshot = (page: Page, name: string) => page.screenshot({ path: `screenshots/${name} (${colorScheme}).png` });
 
+        // Captures the whole scrollable page by temporarily growing the viewport to its full height.
+        const takeFullPageScreenshot = async (page: Page, name: string) => {
+            const mainScrollHeight = await page.evaluate(() => document.querySelector('main')!.scrollHeight);
+            const viewportSize = page.viewportSize()!;
+            await page.setViewportSize({ width: viewportSize.width, height: mainScrollHeight });
+            await takeScreenshot(page, name);
+            await page.setViewportSize(viewportSize);
+        };
+
         test('displays all the things', async ({ page }) => {
             await page.goto('/');
 
@@ -53,11 +62,40 @@ colorSchemes.forEach(colorScheme => {
             await page.locator('input[data-testid="diff-check"]').uncheck();
             await page.locator('input[data-testid="changes-check"]').uncheck();
             await page.locator('.screen').last().locator('.image-wrapper img').waitFor({ timeout: 10000 });
-            const mainScrollHeight = await page.evaluate(() => document.querySelector('main')!.scrollHeight);
-            const viewportSize = page.viewportSize()!;
-            await page.setViewportSize({ width: viewportSize.width, height: mainScrollHeight });
-            await takeScreenshot(page, 'Screen List - All Screens');
-            await page.setViewportSize(viewportSize);
+            await takeFullPageScreenshot(page, 'Screen List - All Screens');
+
+            // ── Review states ──
+            // Re-enable the changes view so the per-screen review controls are available.
+            await page.locator('input[data-testid="changes-check"]').check();
+
+            // Submits a review for the named screen. A previous (retried) run may have left the
+            // screen already reviewed and collapsed, so expand it first to reach the review bar.
+            const reviewScreen = async (name: string, action: 'approve' | 'reject', comment: string) => {
+                const screen = page.locator('.screen').filter({ hasText: name });
+                // Wait for the screen's review UI to render in whichever state it lands.
+                await screen.locator('.review-bar, .collapsed-summary').first().waitFor();
+                if (await screen.locator('.collapsed-summary').isVisible()) {
+                    await screen.locator('.collapse-toggle').click();
+                    await screen.locator('.review-bar').waitFor();
+                }
+                await screen.locator('.review-comment').fill(comment);
+                await screen.locator(`.review-actions .${action}`).click();
+                await screen.locator('.collapsed-summary').waitFor();
+                return screen;
+            };
+
+            // Collapsed approved: a reviewed screen collapses to its summary row.
+            await reviewScreen('Login', 'approve', 'Looks good!');
+            // Let the collapse/expand transition settle before capturing.
+            await page.waitForTimeout(600);
+            await takeFullPageScreenshot(page, 'Screen List - Approved Collapsed');
+
+            // Expanded rejected: reject, then re-expand to show the active reject state + comment.
+            const rejected = await reviewScreen('Homepage', 'reject', 'Needs changes.');
+            await rejected.locator('.collapse-toggle').click();
+            await rejected.locator('.review-bar').waitFor();
+            await page.waitForTimeout(600);
+            await takeFullPageScreenshot(page, 'Screen List - Rejected Expanded');
         });
     });
 });
