@@ -18,7 +18,8 @@ export default defineConfig({
                     { text: 'Getting Started', link: '/getting-started' },
                     { text: 'Deployment', link: '/deployment' },
                     { text: 'GitLab Setup', link: '/gitlab-setup' },
-                    { text: 'Usage', link: '/usage' }
+                    { text: 'Usage', link: '/usage' },
+                    { text: 'LLM Access (MCP)', link: '/llm-access' }
                 ]
             }
         ],

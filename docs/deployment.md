@@ -178,6 +178,14 @@ kubectl exec deploy/pixelci-server -- node . migration:run
 | ------------------- | -------- | ------- | ------------------------------------------- |
 | `ENABLE_JOB_RUNNER` | No       | `false` | Enable the job runner on the server process |
 
+### Access Control
+
+By default, PixelCI filters app reads (both the web UI and the [`/api/ext` API](/llm-access#rest-api)) by whether the requesting user or token can access the app's project in the VCS provider — so users only see the apps their GitLab account can access.
+
+| Variable                     | Required | Default | Description                                                                                                                                                |
+| ---------------------------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ENFORCE_VCS_PROJECT_ACCESS` | No       | `true`  | Gate app reads by VCS project access. Set `false` to make every authenticated user able to read every app (e.g. for environments without a reachable VCS). |
+
 ### Tuning
 
 | Variable                           | Required | Default | Description                                                                                                                                                                   |

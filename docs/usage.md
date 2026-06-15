@@ -11,7 +11,7 @@ Visit your PixelCI instance and log in via your configured OAuth provider (e.g. 
 
 ## Apps List
 
-After logging in, you'll see all apps configured in PixelCI.
+After logging in, you'll see your apps. PixelCI only shows apps whose VCS project your account can access — access mirrors what GitLab grants you. (Operators can disable this filtering; see [`ENFORCE_VCS_PROJECT_ACCESS`](/deployment#access-control).)
 
 <img src="/images/app-list-light.png" alt="App list" class="light-only">
 <img src="/images/app-list-dark.png" alt="App list" class="dark-only">
@@ -56,16 +56,28 @@ Uncheck **Show Changes** to view every screen in the build, including unchanged 
 <img src="/images/screen-all-light.png" alt="All screens" class="light-only">
 <img src="/images/screen-all-dark.png" alt="All screens" class="dark-only">
 
-## Approving Changes
+## Reviewing Changes
 
-Click **Approve** to approve all visual changes in a build. This marks the build as the new approved baseline.
+When a build needs review, every changed screen has its own controls beneath the comparison: a comment box and **Approve** / **Reject** buttons.
 
-Once approved:
+- **Approve** or **Reject** each screen to record your decision. Type an optional comment first — it's saved together with the decision.
+- Once you act on a screen it **collapses** so you can focus on what you haven't seen yet. Click it to expand again and change your decision.
+- Reviewed screens show an **Approved** or **Rejected** badge, and the comment appears in the collapsed summary.
+
+### Approving the Build
+
+The **Approve** button at the bottom of the build is enabled only once **every changed screen has been approved** — a counter shows your progress (e.g. "3 of 5 screens approved"). A rejected screen blocks approval until you resolve it.
+
+Once the build is approved:
 
 - The build status changes to **Changes Approved**
 - The failed CI job is automatically restarted via the GitLab API, and you're redirected to the pipeline page
 - Future builds on the same branch will compare against this build
 - Other branches that produce the same visual changes will be automatically approved (cross-branch approval matching)
+
+### Carrying Reviews Forward
+
+You don't have to re-approve the same screen on every build. When a new build is processed, any screen that was individually approved or rejected since this branch's last approval is **pre-marked with that same decision (and comment)** — as long as the screenshot still matches. Unchanged screens arrive already reviewed and collapsed, so you only review what's genuinely new.
 
 ## Build Status Flow
 
