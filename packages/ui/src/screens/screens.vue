@@ -96,7 +96,12 @@
                                 </div>
                                 <div v-else-if="screen.referenceBuildScreen?.imageSrc === false" class="error" />
                                 <Loader v-else-if="!screen.referenceBuildScreen?.imageSrc" class="loading" />
-                                <img v-else :src="screen.referenceBuildScreen?.imageSrc" :alt="`Reference screenshot: ${screen.name}`" />
+                                <img
+                                    v-else
+                                    :src="screen.referenceBuildScreen?.imageSrc"
+                                    :alt="`Reference screenshot: ${screen.name}`"
+                                    @load="setNaturalWidth"
+                                />
                             </div>
 
                             <span class="col-start-2 row-start-1">New Build</span>
@@ -111,7 +116,12 @@
                                 <div class="image-wrapper-inner" :class="{ 'opacity-0': showChanges && showDiff }">
                                     <div v-if="screen.currentBuildScreen?.imageSrc === false" class="error" />
                                     <Loader v-else-if="!screen.currentBuildScreen?.imageSrc" class="loading" />
-                                    <img v-else :src="screen.currentBuildScreen.imageSrc" :alt="`New build screenshot: ${screen.name}`" />
+                                    <img
+                                        v-else
+                                        :src="screen.currentBuildScreen.imageSrc"
+                                        :alt="`New build screenshot: ${screen.name}`"
+                                        @load="setNaturalWidth"
+                                    />
                                 </div>
 
                                 <div v-if="showChanges && showDiff" class="image-wrapper-inner diff">
@@ -120,7 +130,7 @@
                                     </div>
                                     <div v-else-if="screen.diffImageSrc === false" class="error" />
                                     <Loader v-else-if="!screen.diffImageSrc" class="loading" />
-                                    <img v-else :src="screen.diffImageSrc" :alt="`Visual diff: ${screen.name}`" />
+                                    <img v-else :src="screen.diffImageSrc" :alt="`Visual diff: ${screen.name}`" @load="setNaturalWidth" />
                                 </div>
                             </template>
                         </div>
@@ -259,6 +269,12 @@ function isCollapsed(screen: IScreen) {
 
 function toggleExpanded(screen: IScreen) {
     screen.reviewExpanded = !screen.reviewExpanded;
+}
+
+// Cap the rendered width at the screenshot's intrinsic size so images are never stretched larger than actual.
+function setNaturalWidth(e: Event) {
+    const img = e.target as HTMLImageElement;
+    img.style.setProperty('--natural-width', `${img.naturalWidth}px`);
 }
 
 async function submitReview(screen: IScreen, reviewStatus: 'approved' | 'rejected') {
@@ -550,7 +566,7 @@ function getStatusStyle(status?: NonNullable<IBuildScreenResponse['currentBuildS
 
             img {
                 @apply h-auto rounded-md mx-auto;
-                width: var(--zoom);
+                width: min(var(--zoom), var(--natural-width, 100%));
             }
 
             .placeholder {
