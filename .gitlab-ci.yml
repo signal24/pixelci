@@ -24,7 +24,7 @@ stages:
 
 .test-services:
   extends: .test-base
-  image: mcr.microsoft.com/playwright:v1.58.2-jammy
+  image: mcr.microsoft.com/playwright:v1.60.0-jammy
   services:
     - name: mysql:8
       variables:
