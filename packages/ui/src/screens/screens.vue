@@ -14,15 +14,19 @@
                     <h1>Screens</h1>
                 </div>
 
-                <a v-if="build && commitUrl" class="commit-info" :href="commitUrl" target="_blank" v-tooltip="build.commitSubject">
-                    <i class="fa fa-code-commit fa-sm" />
-                    <span class="font-mono">{{ build.commitHash?.substring(0, 8) }}</span>
-                    <span class="truncate">{{ build.commitSubject }}</span>
-                </a>
-                <div v-else-if="build" class="commit-info">
-                    <i class="fa fa-code-commit fa-sm" />
-                    <span class="font-mono">{{ build.commitHash?.substring(0, 8) }}</span>
-                    <span class="truncate">{{ build.commitSubject }}</span>
+                <div class="header-center">
+                    <span class="screen-count">{{ totalScreens }} {{ totalScreens === 1 ? 'screen' : 'screens' }}</span>
+
+                    <a v-if="build && commitUrl" class="commit-info" :href="commitUrl" target="_blank" v-tooltip="build.commitSubject">
+                        <i class="fa fa-code-commit fa-sm" />
+                        <span class="font-mono">{{ build.commitHash?.substring(0, 8) }}</span>
+                        <span class="truncate">{{ build.commitSubject }}</span>
+                    </a>
+                    <div v-else-if="build" class="commit-info">
+                        <i class="fa fa-code-commit fa-sm" />
+                        <span class="font-mono">{{ build.commitHash?.substring(0, 8) }}</span>
+                        <span class="truncate">{{ build.commitSubject }}</span>
+                    </div>
                 </div>
 
                 <div class="flex gap-4 items-center">
@@ -43,7 +47,12 @@
             </div>
 
             <div class="screen-list" :style="{ '--zoom': zoomLevel + '%' }">
-                <div v-for="screen in displayScreens" class="screen">
+                <div
+                    v-for="(screen, index) in displayScreens"
+                    :key="screen.screenId"
+                    :ref="el => setScreenRef(screen.screenId, el as HTMLElement | null)"
+                    class="screen"
+                >
                     <div class="screen-meta">
                         <div class="flex items-center gap-3 min-w-0">
                             <button
@@ -54,6 +63,8 @@
                             >
                                 <i class="fa" :class="isCollapsed(screen) ? 'fa-chevron-right' : 'fa-chevron-down'" />
                             </button>
+
+                            <span class="screen-number">{{ index + 1 }}</span>
 
                             <span class="screen-name">{{ screen.name }}</span>
 
@@ -85,54 +96,66 @@
                         "
                         v-show="!isCollapsed(screen)"
                         class="image-wrapper-outer"
-                        :class="{ '!grid-cols-1 !grid-rows-1': !showChanges }"
+                        :class="{ single: !showChanges }"
                     >
-                        <template v-if="showChanges">
-                            <span class="col-1 row-1">Reference Build</span>
+                        <div v-if="showChanges" class="labels">
+                            <span>Reference Build</span>
+                            <span>New Build</span>
+                        </div>
 
-                            <div class="image-wrapper left">
-                                <div v-if="!screen.referenceBuildScreen" class="placeholder">
-                                    <span>Screen does not exist in reference build</span>
-                                </div>
-                                <div v-else-if="screen.referenceBuildScreen?.imageSrc === false" class="error" />
-                                <Loader v-else-if="!screen.referenceBuildScreen?.imageSrc" class="loading" />
-                                <img
-                                    v-else
-                                    :src="screen.referenceBuildScreen?.imageSrc"
-                                    :alt="`Reference screenshot: ${screen.name}`"
-                                    @load="setNaturalWidth"
-                                />
-                            </div>
-
-                            <span class="col-start-2 row-start-1">New Build</span>
-                        </template>
-
-                        <div class="image-wrapper right">
-                            <div v-if="!screen.currentBuildScreen" class="placeholder">
-                                <span>Screen has been removed</span>
-                            </div>
-
-                            <template v-else>
-                                <div class="image-wrapper-inner" :class="{ 'opacity-0': showChanges && showDiff }">
-                                    <div v-if="screen.currentBuildScreen?.imageSrc === false" class="error" />
-                                    <Loader v-else-if="!screen.currentBuildScreen?.imageSrc" class="loading" />
+                        <div class="scroll-frame">
+                            <div class="images">
+                                <div v-if="showChanges" class="image-wrapper left">
+                                    <div v-if="!screen.referenceBuildScreen" class="placeholder">
+                                        <span>Screen does not exist in reference build</span>
+                                    </div>
+                                    <div v-else-if="screen.referenceBuildScreen?.imageSrc === false" class="error" />
+                                    <Loader v-else-if="!screen.referenceBuildScreen?.imageSrc" class="loading" />
                                     <img
                                         v-else
-                                        :src="screen.currentBuildScreen.imageSrc"
-                                        :alt="`New build screenshot: ${screen.name}`"
+                                        :src="screen.referenceBuildScreen?.imageSrc"
+                                        :alt="`Reference screenshot: ${screen.name}`"
                                         @load="setNaturalWidth"
                                     />
                                 </div>
 
-                                <div v-if="showChanges && showDiff" class="image-wrapper-inner diff">
-                                    <div v-if="!screen.referenceBuildScreen" class="placeholder">
-                                        <span>No diff available since this screen is new</span>
+                                <div
+                                    class="image-wrapper right"
+                                    :class="{ 'diff-toggleable': showChanges && screen.referenceBuildScreen }"
+                                    @click="onImageShiftClick($event)"
+                                >
+                                    <span v-if="showChanges && screen.referenceBuildScreen" class="diff-hint">
+                                        <i class="fa fa-layer-group fa-sm" />
+                                        Shift+click to {{ diffShown ? 'hide' : 'show' }} all diffs
+                                    </span>
+
+                                    <div v-if="!screen.currentBuildScreen" class="placeholder">
+                                        <span>Screen has been removed</span>
                                     </div>
-                                    <div v-else-if="screen.diffImageSrc === false" class="error" />
-                                    <Loader v-else-if="!screen.diffImageSrc" class="loading" />
-                                    <img v-else :src="screen.diffImageSrc" :alt="`Visual diff: ${screen.name}`" @load="setNaturalWidth" />
+
+                                    <template v-else>
+                                        <div class="image-wrapper-inner" :class="{ 'opacity-0': diffShown }">
+                                            <div v-if="screen.currentBuildScreen?.imageSrc === false" class="error" />
+                                            <Loader v-else-if="!screen.currentBuildScreen?.imageSrc" class="loading" />
+                                            <img
+                                                v-else
+                                                :src="screen.currentBuildScreen.imageSrc"
+                                                :alt="`New build screenshot: ${screen.name}`"
+                                                @load="setNaturalWidth"
+                                            />
+                                        </div>
+
+                                        <div v-if="diffShown" class="image-wrapper-inner diff">
+                                            <div v-if="!screen.referenceBuildScreen" class="placeholder">
+                                                <span>No diff available since this screen is new</span>
+                                            </div>
+                                            <div v-else-if="screen.diffImageSrc === false" class="error" />
+                                            <Loader v-else-if="!screen.diffImageSrc" class="loading" />
+                                            <img v-else :src="screen.diffImageSrc" :alt="`Visual diff: ${screen.name}`" @load="setNaturalWidth" />
+                                        </div>
+                                    </template>
                                 </div>
-                            </template>
+                            </div>
                         </div>
                     </div>
 
@@ -193,7 +216,7 @@
 <script lang="ts" setup>
 import { dataFrom, dataFromAsync } from '@zyno-io/openapi-client-codegen';
 import { formatError, handleError, handleErrorAndAlert, showAlert, showConfirm } from '@zyno-io/vue-foundation';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import {
@@ -242,6 +265,11 @@ const displayScreens = computed(() => {
     return screens.value?.filter(screen => screen.currentBuildScreen);
 });
 
+const totalScreens = computed(() => displayScreens.value?.length ?? 0);
+
+// Diffs are shown/hidden globally; shift+clicking any screenshot toggles this just like the header checkbox.
+const diffShown = computed(() => showChanges.value && showDiff.value);
+
 const commitUrl = computed(() => {
     if (app.value?.commitUrlBase && build.value?.commitHash) {
         return `${app.value.commitUrlBase}/${build.value.commitHash}`;
@@ -271,6 +299,33 @@ function toggleExpanded(screen: IScreen) {
     screen.reviewExpanded = !screen.reviewExpanded;
 }
 
+// Shift+click on any screenshot toggles the diff overlay for ALL screens, mirroring the header checkbox.
+function onImageShiftClick(e: MouseEvent) {
+    if (!e.shiftKey || !showChanges.value) return;
+    e.preventDefault();
+    showDiff.value = !showDiff.value;
+}
+
+const screenRefs = new Map<string, HTMLElement>();
+
+function setScreenRef(screenId: string, el: HTMLElement | null) {
+    if (el) screenRefs.set(screenId, el);
+    else screenRefs.delete(screenId);
+}
+
+// After a screen collapses on review, bring the next screen's header to the top of the viewport.
+async function scrollToNextScreen(current: IScreen) {
+    const list = displayScreens.value;
+    if (!list) return;
+
+    const idx = list.findIndex(s => s.screenId === current.screenId);
+    if (idx < 0 || idx >= list.length - 1) return;
+
+    const next = list[idx + 1];
+    await nextTick();
+    screenRefs.get(next.screenId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 // Cap the rendered width at the screenshot's intrinsic size so images are never stretched larger than actual.
 function setNaturalWidth(e: Event) {
     const img = e.target as HTMLImageElement;
@@ -298,6 +353,7 @@ async function submitReview(screen: IScreen, reviewStatus: 'approved' | 'rejecte
         screen.currentBuildScreen.reviewedById = result.reviewedById;
         screen.currentBuildScreen.reviewedAt = result.reviewedAt;
         screen.reviewExpanded = false;
+        scrollToNextScreen(screen);
     } catch (err) {
         handleErrorAndAlert(err);
     } finally {
@@ -446,6 +502,14 @@ function getStatusStyle(status?: NonNullable<IBuildScreenResponse['currentBuildS
 @reference "tailwindcss";
 
 #screens {
+    .header-center {
+        @apply flex items-center gap-4 min-w-0;
+    }
+
+    .screen-count {
+        @apply shrink-0 px-2.5 py-1 rounded-md text-sm font-medium tabular-nums bg-neutral-500/15 border border-neutral-500/25 text-neutral-400 whitespace-nowrap;
+    }
+
     .commit-info {
         @apply flex items-center gap-2 text-neutral-400 text-sm max-w-[400px] no-underline;
 
@@ -463,7 +527,7 @@ function getStatusStyle(status?: NonNullable<IBuildScreenResponse['currentBuildS
     }
 
     .screen {
-        @apply relative flex flex-col gap-4 p-4 bg-neutral-500/10 border border-neutral-500/25 rounded-md;
+        @apply relative flex flex-col gap-4 p-4 bg-neutral-500/10 border border-neutral-500/25 rounded-md scroll-mt-20;
 
         .screen-meta {
             @apply flex justify-between gap-4;
@@ -471,6 +535,10 @@ function getStatusStyle(status?: NonNullable<IBuildScreenResponse['currentBuildS
             .screen-status {
                 @apply px-2 py-1 border rounded-md text-sm whitespace-nowrap;
             }
+        }
+
+        .screen-number {
+            @apply shrink-0 px-2 py-0.5 rounded-md text-sm font-mono font-medium tabular-nums bg-neutral-500/15 border border-neutral-500/25 text-neutral-400;
         }
 
         .collapse-toggle {
@@ -546,10 +614,31 @@ function getStatusStyle(status?: NonNullable<IBuildScreenResponse['currentBuildS
         }
 
         .image-wrapper-outer {
-            @apply grid grid-cols-2 grid-rows-[30px_auto] border-t border-neutral-500/25 pt-4 gap-1 duration-500 ease-in-out;
+            @apply flex flex-col border-t border-neutral-500/25 pt-4 gap-1 duration-500 ease-in-out;
 
-            span {
-                @apply text-center font-bold uppercase text-neutral-500;
+            .labels {
+                @apply grid grid-cols-2 gap-1;
+
+                span {
+                    @apply text-center font-bold uppercase text-neutral-500;
+                }
+            }
+
+            // Cap the comparison at one viewport so very tall screenshots scroll internally instead of
+            // stretching the page. Both columns live in this single scroller, so they stay pixel-synced.
+            // The offset reserves room for the sticky header + this card's meta/labels above and the
+            // review bar (comment + approve/reject) below, so those stay on-screen with the frame.
+            .scroll-frame {
+                @apply overflow-y-auto rounded-md;
+                max-height: calc(100vh - 23rem);
+
+                .images {
+                    @apply grid grid-cols-2 gap-1 items-stretch;
+                }
+            }
+
+            &.single .scroll-frame .images {
+                @apply grid-cols-1;
             }
 
             .image-wrapper {
@@ -561,6 +650,14 @@ function getStatusStyle(status?: NonNullable<IBuildScreenResponse['currentBuildS
                     &.diff {
                         @apply absolute top-0 left-0 h-full;
                     }
+                }
+
+                .diff-hint {
+                    @apply absolute top-2 right-2 z-10 flex items-center gap-1.5 px-2 py-1 rounded-md text-xs normal-case font-normal bg-neutral-900/70 text-neutral-200 opacity-0 pointer-events-none transition-opacity duration-150;
+                }
+
+                &.diff-toggleable:hover .diff-hint {
+                    @apply opacity-100;
                 }
             }
 

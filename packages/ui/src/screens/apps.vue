@@ -8,12 +8,21 @@
                 <button v-if="store.isAdmin" class="primary" @click="showCreateForm">Add App</button>
             </div>
 
+            <div v-if="apps?.length" class="search-bar">
+                <i class="fa fa-magnifying-glass" />
+                <input v-model="search" type="text" placeholder="Search apps..." />
+            </div>
+
             <div class="app-list">
                 <div v-if="!apps?.length" class="empty">
                     <i class="fa fa-cube" />
                     <h2>No apps</h2>
                 </div>
-                <div v-for="app in apps" :key="app.id" class="app" @click="viewApp(app)">
+                <div v-else-if="!visibleApps.length" class="empty">
+                    <i class="fa fa-magnifying-glass" />
+                    <h2>No matching apps</h2>
+                </div>
+                <div v-for="app in visibleApps" :key="app.id" class="app" @click="viewApp(app)">
                     <span>{{ app.name }}</span>
                     <div class="app-right">
                         <span>{{ app.buildCount || 'No' }} {{ app.buildCount === 1 ? 'build' : 'builds' }}</span>
@@ -181,6 +190,14 @@ const router = useRouter();
 const apps = ref<IAppIndexResponse[]>();
 const vcsIntegrations = ref<IVcsIntegrationListResponse[]>();
 const isLoading = ref(true);
+const search = ref('');
+
+const visibleApps = computed(() => {
+    const sorted = [...(apps.value ?? [])].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '', undefined, { sensitivity: 'base' }));
+    const query = search.value.trim().toLowerCase();
+    if (!query) return sorted;
+    return sorted.filter(app => (app.name ?? '').toLowerCase().includes(query));
+});
 const isSubmitting = ref(false);
 // Create form state
 const showCreate = ref(false);
@@ -427,6 +444,18 @@ async function deleteApp() {
 @reference "tailwindcss";
 
 #apps {
+    .search-bar {
+        @apply flex items-center gap-3 mb-4 px-4 py-2.5 bg-neutral-500/10 border border-neutral-500/25 rounded-md text-neutral-400 focus-within:border-neutral-500/50 transition-colors;
+
+        i {
+            @apply text-sm;
+        }
+
+        input {
+            @apply flex-1 bg-transparent border-0 p-0 outline-none text-base text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-500;
+        }
+    }
+
     .app-list {
         @apply flex flex-col gap-4;
     }
