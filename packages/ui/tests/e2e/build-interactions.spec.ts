@@ -2,17 +2,15 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Build Interactions', () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto('/');
-
-        // Set valid JWT
-        await page.evaluate(() => {
+        // Pre-auth before the first navigation so the single-provider login doesn't auto-redirect to OAuth.
+        await page.addInitScript(() => {
             window.localStorage.setItem(
                 'pixelci:jwt',
                 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcHAiLCJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDAiLCJleHAiOjI1MjQ2MDc5OTksImlhdCI6MTc0NzYzMjc2Mn0.7FmHrOWWRWmH8i8floyAE-VvYu4Lya_9c-Qy68r8puI'
             );
         });
 
-        await page.reload();
+        await page.goto('/');
     });
 
     test('displays build metadata correctly', async ({ page }) => {

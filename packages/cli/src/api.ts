@@ -4,7 +4,7 @@ import { openAsBlob } from 'fs';
 import { ICIJobInfo } from './ci.js';
 import { AppError } from './error.js';
 
-export type IBuildStatus = 'draft' | 'processing' | 'no changes' | 'needs review' | 'changes approved' | 'failed';
+export type IBuildStatus = 'draft' | 'processing' | 'no changes' | 'needs review' | 'changes approved' | 'changes rejected' | 'failed';
 
 export function getApi(jobInfo: ICIJobInfo): PixelCiApi {
     const apiUrl = process.env.PIXELCI_API_URL;

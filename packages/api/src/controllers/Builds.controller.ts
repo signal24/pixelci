@@ -198,27 +198,49 @@ export class BuildsController {
         await this.appAccessSvc.assertCanAccessAppId({ kind: 'user', user }, appId);
         if (build.status !== 'needs review') throw new HttpBadRequestError('Build is not in needs review status');
 
+        let rejected = false;
         await this.db.transaction(async txn => {
             const buildScreens = await txn
                 .query(BuildScreenEntity)
                 .filter({ appId, buildId: id, status: { $ne: 'no changes' } })
                 .find();
 
-            const unapproved = buildScreens.filter(
-                buildScreen => (buildScreen.status === 'new' || buildScreen.status === 'needs review') && buildScreen.reviewStatus !== 'approved'
-            );
-            if (unapproved.length) throw new HttpBadRequestError('All changed screens must be approved before the build can be approved');
+            const changedScreens = buildScreens.filter(buildScreen => buildScreen.status === 'new' || buildScreen.status === 'needs review');
 
-            buildScreens.forEach(buildScreen => {
-                buildScreen.status = 'changes approved';
-                txn.add(buildScreen);
-            });
+            // Unreviewed changed screens are auto-approved on submit.
+            const now = new Date();
+            for (const buildScreen of changedScreens) {
+                if (buildScreen.reviewStatus !== 'approved' && buildScreen.reviewStatus !== 'rejected') {
+                    buildScreen.reviewStatus = 'approved';
+                    buildScreen.reviewedById = user.id;
+                    buildScreen.reviewedAt = now;
+                }
+            }
 
-            build.status = 'changes approved';
-            build.approvedById = user.id;
-            build.approvedAt = new Date();
+            if (changedScreens.some(buildScreen => buildScreen.reviewStatus === 'rejected')) {
+                // Any rejection fails the build: record the per-screen decisions but don't promote any
+                // screen to a baseline.
+                changedScreens.forEach(buildScreen => txn.add(buildScreen));
+                build.status = 'changes rejected';
+                rejected = true;
+            } else {
+                buildScreens.forEach(buildScreen => {
+                    buildScreen.status = 'changes approved';
+                    txn.add(buildScreen);
+                });
+                build.status = 'changes approved';
+                build.approvedById = user.id;
+                build.approvedAt = now;
+            }
+
             txn.add(build);
         });
+
+        // A rejected build has already failed its check (the original CI job exited non-zero); there's
+        // nothing to re-run, so don't trigger the VCS job.
+        if (rejected) {
+            return { vcsUrl: false };
+        }
 
         if (process.env.CI) {
             return { vcsUrl: 'integration-test://' };

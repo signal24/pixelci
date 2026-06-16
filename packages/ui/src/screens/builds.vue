@@ -75,6 +75,8 @@
                                 <i class="fa fa-check fa-sm fa-fw" v-if="build.status === 'no changes'" />
                                 <!-- failed -->
                                 <i class="fa fa-xmark fa-sm fa-fw" v-if="build.status === 'failed'" />
+                                <!-- rejected -->
+                                <i class="fa fa-xmark fa-sm fa-fw" v-if="build.status === 'changes rejected'" />
                                 <span>{{ getStatusText(build.status) }}</span>
                             </div>
                         </div>
@@ -163,6 +165,7 @@ function getStatusStyle(status: IBuildResponse['status']) {
         case 'no changes':
             return 'bg-blue-500/10 border-blue-500/50 text-blue-500';
         case 'failed':
+        case 'changes rejected':
             return 'bg-red-500/10 border-red-500/50 text-red-500';
         default:
             return '';
@@ -183,6 +186,8 @@ function getStatusText(status: IBuildResponse['status']) {
             return 'No Changes';
         case 'failed':
             return 'Failed';
+        case 'changes rejected':
+            return 'Rejected';
         default:
             return status;
     }

@@ -29,12 +29,9 @@ colorSchemes.forEach(colorScheme => {
         };
 
         test('displays all the things', async ({ page }) => {
-            await page.goto('/');
-
-            await expect(page.url()).toMatch(/\/apps$/);
-            await takeScreenshot(page, 'Login');
-
-            await page.evaluate(() => {
+            // Pre-auth before the first navigation: with a single VCS provider the login screen now
+            // auto-redirects to the (unreachable) OAuth host, so there's no picker to land on/screenshot.
+            await page.addInitScript(() => {
                 // jwt for zero ID valid until 2049
                 window.localStorage.setItem(
                     'pixelci:jwt',
@@ -42,7 +39,9 @@ colorSchemes.forEach(colorScheme => {
                 );
             });
 
-            await page.reload();
+            await page.goto('/');
+
+            await expect(page.url()).toMatch(/\/apps$/);
             await takeScreenshot(page, 'App List');
 
             await page.locator('.app').first().click();

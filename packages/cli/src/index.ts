@@ -69,6 +69,11 @@ if (buildStatus === 'failed') {
     throw new AppError(`Build ${buildId} failed during processing.`);
 }
 
+if (buildStatus === 'changes rejected') {
+    console.error(`Build ${buildId} was rejected during review.`);
+    process.exit(1);
+}
+
 if (buildStatus === 'needs review') {
     process.exit(1);
 }

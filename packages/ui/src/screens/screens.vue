@@ -204,10 +204,7 @@
             </div>
 
             <div v-if="hasPendingChanges" class="button-wrapper">
-                <span v-if="!allScreensApproved" class="review-progress">
-                    {{ approvedScreenCount }} of {{ reviewableScreens.length }} screens approved
-                </span>
-                <button class="primary" :disabled="!allScreensApproved" @click="approveBuild">Approve</button>
+                <button class="primary" @click="submitBuild">{{ submitLabel }}</button>
             </div>
         </template>
     </div>
@@ -283,9 +280,23 @@ const hasPendingChanges = computed(() =>
 
 const reviewableScreens = computed(() => screens.value?.filter(needsReview) ?? []);
 const approvedScreenCount = computed(() => reviewableScreens.value.filter(s => s.currentBuildScreen?.reviewStatus === 'approved').length);
-const allScreensApproved = computed(
-    () => reviewableScreens.value.length > 0 && reviewableScreens.value.every(s => s.currentBuildScreen?.reviewStatus === 'approved')
-);
+const rejectedScreenCount = computed(() => reviewableScreens.value.filter(s => s.currentBuildScreen?.reviewStatus === 'rejected').length);
+const unreviewedScreenCount = computed(() => reviewableScreens.value.filter(s => !s.currentBuildScreen?.reviewStatus).length);
+
+// Submit auto-approves any unreviewed screens; the label spells out the resulting approvals/rejections.
+const submitLabel = computed(() => {
+    const approvals = approvedScreenCount.value;
+    const rejections = rejectedScreenCount.value;
+    const unreviewed = unreviewedScreenCount.value;
+    if (unreviewed === 0 && rejections === 0) return 'Approve All';
+
+    const totalApprovals = approvals + unreviewed;
+    const parts = [`${totalApprovals} ${totalApprovals === 1 ? 'approval' : 'approvals'}`];
+    if (rejections > 0) parts.push(`${rejections} ${rejections === 1 ? 'rejection' : 'rejections'}`);
+
+    const submit = `Submit ${parts.join(', ')}`;
+    return unreviewed > 0 ? `Auto-approve ${unreviewed} + ${submit}` : submit;
+});
 
 function needsReview(screen: IScreen) {
     return screen.currentBuildScreen?.status === 'new' || screen.currentBuildScreen?.status === 'needs review';
@@ -445,8 +456,18 @@ async function getScreenDiff(screen: IBuildScreenResponse) {
     }
 }
 
-async function approveBuild() {
-    const response = await showConfirm(`Are you sure you'd like to approve these changes?`);
+async function submitBuild() {
+    const rejections = rejectedScreenCount.value;
+    const unreviewed = unreviewedScreenCount.value;
+
+    let message = `Are you sure you'd like to submit these changes?`;
+    if (rejections > 0) {
+        message = `Submit with ${rejections} ${rejections === 1 ? 'rejection' : 'rejections'}? Rejected screens will fail the build.`;
+    } else if (unreviewed > 0) {
+        message = `Auto-approve ${unreviewed} unreviewed ${unreviewed === 1 ? 'screen' : 'screens'} and submit?`;
+    }
+
+    const response = await showConfirm(message);
     if (!response) return;
 
     try {
@@ -457,8 +478,14 @@ async function approveBuild() {
             })
         );
 
+        if (rejections > 0) {
+            // The build is now rejected (failed); there's no CI job to follow. Show the result.
+            location.href = `/apps/${route.params.id}`;
+            return;
+        }
+
         if (!vcsUrl) {
-            await showAlert('The build was approved, but the VCS CI job could not be re-run automatically.');
+            await showAlert('Your review was submitted, but the VCS CI job could not be re-run automatically.');
             isLoading.value = false;
         } else {
             location.href = vcsUrl;
@@ -686,10 +713,6 @@ function getStatusStyle(status?: NonNullable<IBuildScreenResponse['currentBuildS
 
     .button-wrapper {
         @apply py-4 flex gap-4 items-center justify-end;
-
-        .review-progress {
-            @apply text-sm text-neutral-400;
-        }
 
         button:disabled {
             @apply opacity-50 cursor-not-allowed;

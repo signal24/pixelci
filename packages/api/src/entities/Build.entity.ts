@@ -12,7 +12,7 @@ export class BuildEntity extends BaseEntity {
     commitAuthor!: string;
     ciJobId!: string;
     ciTokenHash!: string | null;
-    status!: 'draft' | 'processing' | 'no changes' | 'needs review' | 'changes approved' | 'canceled' | 'failed';
+    status!: 'draft' | 'processing' | 'no changes' | 'needs review' | 'changes approved' | 'changes rejected' | 'canceled' | 'failed';
     approvedById!: UuidString | null;
     approvedAt!: Date | null;
 }
