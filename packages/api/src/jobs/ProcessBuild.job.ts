@@ -1,9 +1,9 @@
-import { ScopedLogger } from '@deepkit/logger';
-import { AnyResponse, BaseJob, WorkerJob } from '@zyno-io/dk-server-foundation';
+import { ScopedLogger } from '@zyno-io/ts-server-foundation';
+import { AnyResponse, BaseJob, WorkerJob } from '@zyno-io/ts-server-foundation';
 import { keyBy } from 'lodash';
 
 import { AppConfig } from '../config';
-import { DB } from '../database';
+import { Db } from '../database';
 import { AppEntity } from '../entities/App.entity';
 import { BuildEntity } from '../entities/Build.entity';
 import { BuildScreenEntity } from '../entities/BuildScreen.entity';
@@ -22,7 +22,7 @@ export class ProcessBuildJob extends BaseJob<IProcessBuildJobData> {
     constructor(
         private logger: ScopedLogger,
         private appConfig: AppConfig,
-        private db: DB,
+        private db: Db,
         private s3Svc: S3Service,
         private pixelMatch: PixelMatchService
     ) {

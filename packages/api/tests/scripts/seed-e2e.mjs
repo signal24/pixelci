@@ -1,6 +1,6 @@
 import { CreateBucketCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import fs from 'fs';
-import * as mariadb from 'mariadb';
+import { createConnection } from 'mysql2/promise';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -51,13 +51,12 @@ const FINDER_2_CHANGED_2 = fs.readFileSync(path.join(fixturesDir, 'finder-2-chan
 const FINDER_1_DIFF = fs.readFileSync(path.join(fixturesDir, 'finder-1-diff.png'));
 
 function connect() {
-    return mariadb.createConnection({
+    return createConnection({
         host: process.env.MYSQL_HOST || '127.0.0.1',
         port: parseInt(process.env.MYSQL_PORT || '3306'),
         user: process.env.MYSQL_USER || 'root',
         password: process.env.MYSQL_PASSWORD_SECRET || 'secret',
-        database: process.env.MYSQL_DATABASE || 'pixelci',
-        allowPublicKeyRetrieval: true
+        database: process.env.MYSQL_DATABASE || 'pixelci'
     });
 }
 

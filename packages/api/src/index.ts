@@ -4,7 +4,7 @@ import type { IncomingMessage } from 'http';
 
 // otel must be initialized before all else
 
-require('@zyno-io/dk-server-foundation/telemetry/otel/index.js').init({
+require('@zyno-io/ts-server-foundation/otel').init({
     httpIncomingRequestAttributeHook(request: IncomingMessage) {
         return {
             'openreplay.sid': request.headers['x-openreplay-sessionid'] ?? 'unk'

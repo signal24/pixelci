@@ -1,32 +1,29 @@
-openapi: 3.0.3
+openapi: 3.1.0
+jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
 info:
-  title: OpenAPI
-  contact: {}
-  license:
-    name: MIT
-  version: 0.0.1
-servers: []
+  title: "@zyno-io/pixelci-api"
+  version: 0.3.0
 paths:
   /api/session/me:
     get:
+      operationId: getSessionGetIdentity
       tags:
         - session
-      operationId: getSessionGetIdentity
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ISessionResponse"
   /api/session/providers:
     get:
+      operationId: getSessionGetProviders
       tags:
         - session
-      operationId: getSessionGetProviders
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
@@ -35,28 +32,12 @@ paths:
                   $ref: "#/components/schemas/ISessionProvider"
   /api/session/providers/{id}/login-url:
     get:
+      operationId: getSessionGetProviderLoginUrl
       tags:
         - session
-      operationId: getSessionGetProviderLoginUrl
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
-        - in: query
-          name: redirectUri
-          schema:
-            type: string
-          required: true
-        - in: query
-          name: state
-          schema:
-            type: string
-          required: false
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
@@ -66,62 +47,78 @@ paths:
                     type: string
                 required:
                   - url
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: redirectUri
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
   /api/session/onboarding-status:
     get:
+      operationId: getSessionGetOnboardingStatus
       tags:
         - session
-      operationId: getSessionGetOnboardingStatus
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/IOnboardingStatusResponse"
   /api/session/onboarding/vcs-integration:
     post:
+      operationId: postSessionCreateOnboardingVcsIntegration
       tags:
         - session
-      operationId: postSessionCreateOnboardingVcsIntegration
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/IOnboardingVcsIntegrationInput"
-        required: true
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PickVcsIntegrationEntity"
-  /api/session/login:
-    post:
-      tags:
-        - session
-      operationId: postSessionLogin
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ISessionLoginRequest"
-        required: true
+              $ref: "#/components/schemas/IOnboardingVcsIntegrationInput"
+  /api/session/login:
+    post:
+      operationId: postSessionLogin
+      tags:
+        - session
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ISessionLoginResponse"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ISessionLoginRequest"
   /api/apps:
     get:
+      operationId: getAppsIndex
       tags:
         - apps
-      operationId: getAppsIndex
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
@@ -129,339 +126,309 @@ paths:
                 items:
                   $ref: "#/components/schemas/IAppIndexResponse"
     post:
+      operationId: postAppsCreate
       tags:
         - apps
-      operationId: postAppsCreate
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IAppIndexResponse"
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/IAppCreateInput"
-        required: true
-      responses:
-        "200":
-          description: ""
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/IAppIndexResponse"
   /api/apps/{id}:
     get:
+      operationId: getAppsShow
       tags:
         - apps
-      operationId: getAppsShow
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/IAppShowResponse"
-    put:
-      tags:
-        - apps
-      operationId: putAppsUpdate
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
+          required: true
           schema:
             type: string
-          required: true
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/IAppUpdateInput"
-        required: true
+    put:
+      operationId: putAppsUpdate
+      tags:
+        - apps
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/IAppIndexResponse"
-    delete:
-      tags:
-        - apps
-      operationId: deleteAppsDelete
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
+          required: true
           schema:
             type: string
-          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IAppUpdateInput"
+    delete:
+      operationId: deleteAppsDelete
+      tags:
+        - apps
       responses:
         "200":
-          description: ""
-          content:
-            application/json:
-              schema: {}
+          description: OK
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
   /api/apps/vcs-projects/search:
     get:
+      operationId: getAppsSearchVcsProjects
       tags:
         - apps
-      operationId: getAppsSearchVcsProjects
-      parameters:
-        - in: query
-          name: vcsId
-          schema:
-            type: string
-          required: true
-        - in: query
-          name: search
-          schema:
-            type: string
-          required: true
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: "#/components/schemas/IVcsProject"
+      parameters:
+        - name: vcsId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: search
+          in: query
+          required: true
+          schema:
+            type: string
   /api/apps/vcs-projects/resolve:
     get:
+      operationId: getAppsResolveVcsProject
       tags:
         - apps
-      operationId: getAppsResolveVcsProject
-      parameters:
-        - in: query
-          name: vcsId
-          schema:
-            type: string
-          required: true
-        - in: query
-          name: url
-          schema:
-            type: string
-          required: true
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/IVcsProject"
-  /api/apps/{appId}/branches:
-    get:
-      tags:
-        - branches
-      operationId: getBranchesIndex
       parameters:
-        - in: path
-          name: appId
+        - name: vcsId
+          in: query
+          required: true
           schema:
             type: string
+        - name: url
+          in: query
           required: true
+          schema:
+            type: string
+  /api/apps/{appId}/branches:
+    get:
+      operationId: getBranchesIndex
+      tags:
+        - branches
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: "#/components/schemas/IBranchResponse"
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
   /api/apps/{appId}/builds:
     get:
+      operationId: getBuildsIndex
       tags:
         - builds
-      operationId: getBuildsIndex
-      parameters:
-        - in: path
-          name: appId
-          schema:
-            type: string
-          required: true
-        - in: query
-          name: branchId
-          schema:
-            type: string
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: "#/components/schemas/IBuildResponse"
-    post:
-      tags:
-        - builds
-      operationId: postBuildsCreate
       parameters:
-        - in: path
-          name: appId
+        - name: appId
+          in: path
+          required: true
           schema:
             type: string
-          required: true
+        - name: branchId
+          in: query
+          required: false
+          schema:
+            type: string
+    post:
+      operationId: postBuildsCreate
+      tags:
+        - builds
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/IBuildResponse"
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
   /api/apps/{appId}/builds/{id}:
     get:
+      operationId: getBuildsGet
       tags:
         - builds
-      operationId: getBuildsGet
-      parameters:
-        - in: path
-          name: appId
-          schema:
-            type: string
-          required: true
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/IBuildResponse"
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
   /api/apps/{appId}/builds/{id}/status:
     get:
+      operationId: getBuildsShow
       tags:
         - builds
-      operationId: getBuildsShow
-      parameters:
-        - in: path
-          name: appId
-          schema:
-            type: string
-          required: true
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/IBuildBasicResponse"
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
   /api/apps/{appId}/builds/{id}/process:
     post:
+      operationId: postBuildsProcess
       tags:
         - builds
-      operationId: postBuildsProcess
-      parameters:
-        - in: path
-          name: appId
-          schema:
-            type: string
-          required: true
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
-              schema:
-                type: object
-                properties:
-                  ok:
-                    type: boolean
-                required:
-                  - ok
+              schema: {}
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
   /api/apps/{appId}/builds/{id}/approve:
     post:
+      operationId: postBuildsApprove
       tags:
         - builds
-      operationId: postBuildsApprove
-      parameters:
-        - in: path
-          name: appId
-          schema:
-            type: string
-          required: true
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/IBuildApprovalResponse"
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
   /api/apps/{appId}/builds/{id}/screens:
     get:
+      operationId: getBuildScreensGetScreens
       tags:
         - buildScreens
-      operationId: getBuildScreensGetScreens
-      parameters:
-        - in: path
-          name: appId
-          schema:
-            type: string
-          required: true
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: "#/components/schemas/IBuildScreenResponse"
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
     post:
+      operationId: postBuildScreensUploadScreen
       tags:
         - buildScreens
-      operationId: postBuildScreensUploadScreen
-      parameters:
-        - in: path
-          name: appId
-          schema:
-            type: string
-          required: true
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                image:
-                  $ref: "#/components/schemas/UploadedFile"
-              required:
-                - image
-        required: true
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
@@ -473,113 +440,136 @@ paths:
                         type: string
                     required:
                       - status
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+              required:
+                - image
   /api/apps/{appId}/builds/{id}/screens/{screenId}/image:
     get:
+      operationId: getBuildScreensGetScreenImage
       tags:
         - buildScreens
-      operationId: getBuildScreensGetScreenImage
-      parameters:
-        - in: path
-          name: appId
-          schema:
-            type: string
-          required: true
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
-        - in: path
-          name: screenId
-          schema:
-            type: string
-          required: true
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema: {}
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: screenId
+          in: path
+          required: true
+          schema:
+            type: string
   /api/apps/{appId}/builds/{id}/screens/{screenId}/diff:
     get:
+      operationId: getBuildScreensGetScreenDiff
       tags:
         - buildScreens
-      operationId: getBuildScreensGetScreenDiff
-      parameters:
-        - in: path
-          name: appId
-          schema:
-            type: string
-          required: true
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
-        - in: path
-          name: screenId
-          schema:
-            type: string
-          required: true
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema: {}
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: screenId
+          in: path
+          required: true
+          schema:
+            type: string
   /api/apps/{appId}/builds/{id}/screens/{screenId}/review:
     post:
+      operationId: postBuildScreensReviewScreen
       tags:
         - buildScreens
-      operationId: postBuildScreensReviewScreen
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IBuildScreenReviewResponse"
       parameters:
-        - in: path
-          name: appId
+        - name: appId
+          in: path
+          required: true
           schema:
             type: string
+        - name: id
+          in: path
           required: true
-        - in: path
-          name: id
           schema:
             type: string
+        - name: screenId
+          in: path
           required: true
-        - in: path
-          name: screenId
           schema:
             type: string
-          required: true
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
               properties:
                 reviewStatus:
-                  type: string
                   enum:
                     - approved
                     - rejected
+                  type: string
                 comment:
                   type: string
               required:
                 - reviewStatus
                 - comment
-        required: true
-      responses:
-        "200":
-          description: ""
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/IBuildScreenReviewResponse"
   /api/admin/vcs-integrations:
     get:
+      operationId: getVcsIntegrationsIndex
       tags:
         - vcsIntegrations
-      operationId: getVcsIntegrationsIndex
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
@@ -587,87 +577,84 @@ paths:
                 items:
                   $ref: "#/components/schemas/IVcsIntegrationListResponse"
     post:
+      operationId: postVcsIntegrationsCreate
       tags:
         - vcsIntegrations
-      operationId: postVcsIntegrationsCreate
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IVcsIntegrationListResponse"
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/IVcsIntegrationCreateInput"
-        required: true
-      responses:
-        "200":
-          description: ""
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/IVcsIntegrationListResponse"
   /api/admin/vcs-integrations/{id}:
     get:
+      operationId: getVcsIntegrationsShow
       tags:
         - vcsIntegrations
-      operationId: getVcsIntegrationsShow
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/IVcsIntegrationDetailResponse"
-    put:
-      tags:
-        - vcsIntegrations
-      operationId: putVcsIntegrationsUpdate
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
+          required: true
           schema:
             type: string
-          required: true
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/IVcsIntegrationUpdateInput"
-        required: true
+    put:
+      operationId: putVcsIntegrationsUpdate
+      tags:
+        - vcsIntegrations
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/IVcsIntegrationListResponse"
-    delete:
-      tags:
-        - vcsIntegrations
-      operationId: deleteVcsIntegrationsDelete
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
+          required: true
           schema:
             type: string
-          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IVcsIntegrationUpdateInput"
+    delete:
+      operationId: deleteVcsIntegrationsDelete
+      tags:
+        - vcsIntegrations
       responses:
         "200":
-          description: ""
-          content:
-            application/json:
-              schema: {}
+          description: OK
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
   /api/admin/users:
     get:
+      operationId: getUsersIndex
       tags:
         - users
-      operationId: getUsersIndex
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
@@ -676,24 +663,12 @@ paths:
                   $ref: "#/components/schemas/IUserListResponse"
   /api/admin/users/{id}:
     put:
+      operationId: putUsersUpdate
       tags:
         - users
-      operationId: putUsersUpdate
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/IUserUpdateInput"
-        required: true
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
@@ -706,14 +681,26 @@ paths:
                 required:
                   - id
                   - isAdmin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IUserUpdateInput"
   /api/ext/apps:
     get:
+      operationId: getExternalReadListApps
       tags:
         - externalRead
-      operationId: getExternalReadListApps
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
@@ -722,106 +709,92 @@ paths:
                   $ref: "#/components/schemas/IExtAppResponse"
   /api/ext/apps/{appId}/builds:
     get:
+      operationId: getExternalReadListBuilds
       tags:
         - externalRead
-      operationId: getExternalReadListBuilds
-      parameters:
-        - in: path
-          name: appId
-          schema:
-            type: string
-          required: true
-        - in: query
-          name: branchId
-          schema:
-            type: string
-        - in: query
-          name: limit
-          schema:
-            type: number
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: "#/components/schemas/IExtBuildResponse"
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: branchId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: number
   /api/ext/apps/{appId}/builds/{buildId}:
     get:
+      operationId: getExternalReadGetBuild
       tags:
         - externalRead
-      operationId: getExternalReadGetBuild
-      parameters:
-        - in: path
-          name: appId
-          schema:
-            type: string
-          required: true
-        - in: path
-          name: buildId
-          schema:
-            type: string
-          required: true
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/IExtBuildDetailResponse"
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: buildId
+          in: path
+          required: true
+          schema:
+            type: string
   /api/ext/apps/{appId}/builds/{buildId}/screens/{screenId}/image:
     get:
+      operationId: getExternalReadGetScreenImage
       tags:
         - externalRead
-      operationId: getExternalReadGetScreenImage
-      parameters:
-        - in: path
-          name: appId
-          schema:
-            type: string
-          required: true
-        - in: path
-          name: buildId
-          schema:
-            type: string
-          required: true
-        - in: path
-          name: screenId
-          schema:
-            type: string
-          required: true
-        - in: query
-          name: kind
-          schema:
-            type: string
-            enum:
-              - new
-              - diff
       responses:
         "200":
-          description: ""
+          description: OK
           content:
             application/json:
               schema: {}
-  /healthz:
-    get:
-      tags:
-        - healthcheck
-      operationId: getHealthcheckIndex
-      responses:
-        "200":
-          description: ""
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  version:
-                    type: string
-                required:
-                  - version
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: buildId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: screenId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: kind
+          in: query
+          required: false
+          schema:
+            enum:
+              - new
+              - diff
+            type: string
 components:
   schemas:
     ISessionResponse:
@@ -829,6 +802,8 @@ components:
       properties:
         id:
           type: string
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
         name:
           type: string
         isAdmin:
@@ -842,6 +817,8 @@ components:
       properties:
         id:
           type: string
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
         name:
           type: string
       required:
@@ -854,6 +831,22 @@ components:
           type: boolean
       required:
         - isOnboarded
+    IOnboardingVcsIntegrationInput:
+      type: object
+      properties:
+        name:
+          type: string
+        platform:
+          enum:
+            - gitlab
+            - github
+          type: string
+        config:
+          $ref: "#/components/schemas/IGitLabConfig"
+      required:
+        - name
+        - platform
+        - config
     IGitLabConfig:
       type: object
       properties:
@@ -867,34 +860,20 @@ components:
         - url
         - clientId
         - clientSecret
-    IOnboardingVcsIntegrationInput:
-      type: object
-      properties:
-        name:
-          type: string
-        platform:
-          type: string
-          enum:
-            - gitlab
-            - github
-        config:
-          $ref: "#/components/schemas/IGitLabConfig"
-      required:
-        - name
-        - platform
-        - config
     PickVcsIntegrationEntity:
       type: object
       properties:
         id:
           type: string
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
         name:
           type: string
         platform:
-          type: string
           enum:
             - gitlab
             - github
+          type: string
       required:
         - id
         - name
@@ -924,8 +903,12 @@ components:
       properties:
         id:
           type: string
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
         defaultBranchId:
           type: string
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
         name:
           type: string
         buildCount:
@@ -935,23 +918,33 @@ components:
       properties:
         id:
           type: string
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
         vcsId:
           type: string
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
         projectPath:
           type: string
         vcsProjectId:
-          nullable: true
-          type: number
+          type:
+            - number
+            - "null"
         defaultBranchId:
           type: string
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
         name:
           type: string
         deletedAt:
-          nullable: true
-          type: string
+          type:
+            - string
+            - "null"
+          format: date-time
         commitUrlBase:
-          nullable: true
-          type: string
+          type:
+            - string
+            - "null"
       required:
         - id
         - vcsId
@@ -981,9 +974,11 @@ components:
     IAppUpdateInput:
       type: object
       properties:
-        name:
-          type: string
         defaultBranchId:
+          type: string
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
+        name:
           type: string
     IVcsProject:
       type: object
@@ -1011,6 +1006,8 @@ components:
       properties:
         id:
           type: string
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
         name:
           type: string
       required:
@@ -1021,18 +1018,22 @@ components:
       properties:
         id:
           type: string
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
         branchId:
           type: string
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
+        createdAt:
+          type: string
+          format: date-time
         commitHash:
           type: string
         commitSubject:
           type: string
         commitAuthor:
           type: string
-        createdAt:
-          type: string
         status:
-          type: string
           enum:
             - draft
             - processing
@@ -1042,22 +1043,22 @@ components:
             - changes rejected
             - canceled
             - failed
+          type: string
         branchName:
           type: string
       required:
         - id
         - branchId
+        - createdAt
         - commitHash
         - commitSubject
         - commitAuthor
-        - createdAt
         - status
         - branchName
     IBuildBasicResponse:
       type: object
       properties:
         status:
-          type: string
           enum:
             - draft
             - processing
@@ -1067,6 +1068,7 @@ components:
             - changes rejected
             - canceled
             - failed
+          type: string
       required:
         - status
     IBuildApprovalResponse:
@@ -1080,57 +1082,6 @@ components:
                 - false
       required:
         - vcsUrl
-    PickBuildScreenEntity:
-      type: object
-      properties:
-        id:
-          type: string
-        buildId:
-          type: string
-        matchedBuildId:
-          nullable: true
-          type: string
-        approvalBuildId:
-          nullable: true
-          type: string
-        screenId:
-          type: string
-        status:
-          type: string
-          enum:
-            - new
-            - no changes
-            - needs review
-            - changes approved
-            - null
-          nullable: true
-        reviewStatus:
-          type: string
-          enum:
-            - approved
-            - rejected
-            - null
-          nullable: true
-        reviewComment:
-          nullable: true
-          type: string
-        reviewedById:
-          nullable: true
-          type: string
-        reviewedAt:
-          nullable: true
-          type: string
-      required:
-        - id
-        - buildId
-        - matchedBuildId
-        - approvalBuildId
-        - screenId
-        - status
-        - reviewStatus
-        - reviewComment
-        - reviewedById
-        - reviewedAt
     IBuildScreenResponse:
       type: object
       properties:
@@ -1145,47 +1096,98 @@ components:
       required:
         - screenId
         - name
-    UploadedFile:
-      type: object
-      properties:
-        validator:
-          nullable: true
-        size:
-          type: number
-        path:
-          type: string
-        name:
-          nullable: true
-          type: string
-        type:
-          nullable: true
-          type: string
-        lastModifiedDate:
-          nullable: true
-          type: string
-      required:
-        - validator
-        - size
-        - path
-        - name
-        - type
-        - lastModifiedDate
-    IBuildScreenCreateResponse:
+    PickBuildScreenEntity:
       type: object
       properties:
         id:
           type: string
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
+        buildId:
+          type: string
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
         screenId:
           type: string
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
+        matchedBuildId:
+          type:
+            - string
+            - "null"
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
+        approvalBuildId:
+          type:
+            - string
+            - "null"
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
         status:
-          type: string
           enum:
             - new
             - no changes
             - needs review
             - changes approved
             - null
-          nullable: true
+          type:
+            - string
+            - "null"
+        reviewStatus:
+          enum:
+            - approved
+            - rejected
+            - null
+          type:
+            - string
+            - "null"
+        reviewComment:
+          type:
+            - string
+            - "null"
+        reviewedById:
+          type:
+            - string
+            - "null"
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
+        reviewedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+      required:
+        - id
+        - buildId
+        - screenId
+        - matchedBuildId
+        - approvalBuildId
+        - status
+        - reviewStatus
+        - reviewComment
+        - reviewedById
+        - reviewedAt
+    IBuildScreenCreateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
+        screenId:
+          type: string
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
+        status:
+          enum:
+            - new
+            - no changes
+            - needs review
+            - changes approved
+            - null
+          type:
+            - string
+            - "null"
         name:
           type: string
       required:
@@ -1197,21 +1199,28 @@ components:
       type: object
       properties:
         reviewStatus:
-          type: string
           enum:
             - approved
             - rejected
             - null
-          nullable: true
+          type:
+            - string
+            - "null"
         reviewComment:
-          nullable: true
-          type: string
+          type:
+            - string
+            - "null"
         reviewedById:
-          nullable: true
-          type: string
+          type:
+            - string
+            - "null"
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
         reviewedAt:
-          nullable: true
-          type: string
+          type:
+            - string
+            - "null"
+          format: date-time
       required:
         - reviewStatus
         - reviewComment
@@ -1222,17 +1231,42 @@ components:
       properties:
         id:
           type: string
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
         name:
           type: string
         platform:
-          type: string
           enum:
             - gitlab
             - github
+          type: string
       required:
         - id
         - name
         - platform
+    IVcsIntegrationDetailResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          pattern: ^(?:urn:uuid:)?[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
+        name:
+          type: string
+        platform:
+          enum:
+            - gitlab
+            - github
+          type: string
+        config:
+          oneOf:
+            - $ref: "#/components/schemas/IGitLabConfig"
+            - $ref: "#/components/schemas/IGitHubConfig"
+      required:
+        - id
+        - name
+        - platform
+        - config
     IGitHubConfig:
       type: object
       properties:
@@ -1243,37 +1277,16 @@ components:
       required:
         - clientId
         - clientSecret
-    IVcsIntegrationDetailResponse:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        platform:
-          type: string
-          enum:
-            - gitlab
-            - github
-        config:
-          oneOf:
-            - $ref: "#/components/schemas/IGitLabConfig"
-            - $ref: "#/components/schemas/IGitHubConfig"
-      required:
-        - id
-        - name
-        - platform
-        - config
     IVcsIntegrationCreateInput:
       type: object
       properties:
         name:
           type: string
         platform:
-          type: string
           enum:
             - gitlab
             - github
+          type: string
         config:
           $ref: "#/components/schemas/IGitLabConfig"
       required:
@@ -1298,8 +1311,10 @@ components:
           type: boolean
         createdAt:
           type: string
+          format: date-time
         lastLoginAt:
           type: string
+          format: date-time
         vcsName:
           type: string
       required:
@@ -1340,7 +1355,6 @@ components:
         commitAuthor:
           type: string
         status:
-          type: string
           enum:
             - draft
             - processing
@@ -1350,14 +1364,19 @@ components:
             - changes rejected
             - canceled
             - failed
+          type: string
         createdAt:
           type: string
+          format: date-time
         approvedByName:
-          nullable: true
-          type: string
+          type:
+            - string
+            - "null"
         approvedAt:
-          nullable: true
-          type: string
+          type:
+            - string
+            - "null"
+          format: date-time
       required:
         - id
         - branchName
@@ -1368,46 +1387,6 @@ components:
         - createdAt
         - approvedByName
         - approvedAt
-    IExtBuildScreenResponse:
-      type: object
-      properties:
-        screenId:
-          type: string
-        name:
-          type: string
-        status:
-          type: string
-          enum:
-            - new
-            - no changes
-            - needs review
-            - changes approved
-            - null
-          nullable: true
-        reviewStatus:
-          type: string
-          enum:
-            - approved
-            - rejected
-            - null
-          nullable: true
-        reviewComment:
-          nullable: true
-          type: string
-        reviewedByName:
-          nullable: true
-          type: string
-        reviewedAt:
-          nullable: true
-          type: string
-      required:
-        - screenId
-        - name
-        - status
-        - reviewStatus
-        - reviewComment
-        - reviewedByName
-        - reviewedAt
     IExtBuildDetailResponse:
       type: object
       properties:
@@ -1422,7 +1401,6 @@ components:
         commitAuthor:
           type: string
         status:
-          type: string
           enum:
             - draft
             - processing
@@ -1432,14 +1410,19 @@ components:
             - changes rejected
             - canceled
             - failed
+          type: string
         createdAt:
           type: string
+          format: date-time
         approvedByName:
-          nullable: true
-          type: string
+          type:
+            - string
+            - "null"
         approvedAt:
-          nullable: true
-          type: string
+          type:
+            - string
+            - "null"
+          format: date-time
         screens:
           type: array
           items:
@@ -1455,3 +1438,49 @@ components:
         - approvedByName
         - approvedAt
         - screens
+    IExtBuildScreenResponse:
+      type: object
+      properties:
+        screenId:
+          type: string
+        name:
+          type: string
+        status:
+          enum:
+            - new
+            - no changes
+            - needs review
+            - changes approved
+            - null
+          type:
+            - string
+            - "null"
+        reviewStatus:
+          enum:
+            - approved
+            - rejected
+            - null
+          type:
+            - string
+            - "null"
+        reviewComment:
+          type:
+            - string
+            - "null"
+        reviewedByName:
+          type:
+            - string
+            - "null"
+        reviewedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+      required:
+        - screenId
+        - name
+        - status
+        - reviewStatus
+        - reviewComment
+        - reviewedByName
+        - reviewedAt

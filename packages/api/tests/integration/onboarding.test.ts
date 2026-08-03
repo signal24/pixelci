@@ -1,5 +1,5 @@
-import { HttpRequest } from '@deepkit/http';
-import { createPersistedEntity, JWT, TestingHelpers } from '@zyno-io/dk-server-foundation';
+import { HttpRequest } from '@zyno-io/ts-server-foundation';
+import { createPersistedEntity, JWT, TestingHelpers } from '@zyno-io/ts-server-foundation';
 
 import { CoreAppOptions } from '../../src/app';
 import { UserEntity } from '../../src/entities/User.entity';

@@ -1,10 +1,10 @@
-import { http, HttpBadRequestError, HttpBody, HttpNotFoundError, Redirect, UploadedFile } from '@deepkit/http';
-import { AnyResponse, createPersistedEntity, uuid7 } from '@zyno-io/dk-server-foundation';
+import { http, HttpBadRequestError, HttpBody, HttpNotFoundError, Redirect, FileUpload } from '@zyno-io/ts-server-foundation';
+import { AnyResponse, createPersistedEntity, uuid7 } from '@zyno-io/ts-server-foundation';
 import { keyBy, uniq } from 'lodash';
 
 import { BuildCiTokenMiddleware, UserAuthMiddleware } from '../accessories/AuthMiddleware.accessory';
 import { ApiController } from '../accessories/Controller.accessory';
-import { DB } from '../database';
+import { Db } from '../database';
 import { AppEntity } from '../entities/App.entity';
 import { BuildEntity } from '../entities/Build.entity';
 import { BuildScreenEntity } from '../entities/BuildScreen.entity';
@@ -54,7 +54,7 @@ export type IBuildScreenCreateResponse = Pick<BuildScreenEntity, 'id' | 'screenI
 @ApiController('/api/apps/:appId/builds/:id')
 export class BuildScreensController {
     constructor(
-        private db: DB,
+        private db: Db,
         private s3Svc: S3Service,
         private appAccessSvc: AppAccessService
     ) {}
@@ -102,7 +102,7 @@ export class BuildScreensController {
 
     @http.POST('screens')
     @http.middleware(BuildCiTokenMiddleware)
-    async uploadScreen(appId: string, id: string, body: HttpBody<{ image: UploadedFile }>): Promise<IBuildScreenCreateResponse | { status: string }> {
+    async uploadScreen(appId: string, id: string, body: HttpBody<{ image: FileUpload }>): Promise<IBuildScreenCreateResponse | { status: string }> {
         const build = await BuildEntity.query().filter({ id, appId }).findOneOrUndefined();
         if (!build) throw new HttpNotFoundError();
         if (build.status !== 'draft') throw new HttpBadRequestError('build is not in draft state');

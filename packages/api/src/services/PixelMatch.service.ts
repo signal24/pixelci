@@ -1,4 +1,4 @@
-import { ScopedLogger } from '@deepkit/logger';
+import { ScopedLogger } from '@zyno-io/ts-server-foundation';
 import { memoize } from 'lodash';
 import { PNG } from 'pngjs/browser';
 

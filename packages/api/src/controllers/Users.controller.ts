@@ -1,4 +1,4 @@
-import { http, HttpBadRequestError, HttpBody, HttpNotFoundError } from '@deepkit/http';
+import { http, HttpBadRequestError, HttpBody, HttpNotFoundError } from '@zyno-io/ts-server-foundation';
 
 import { AdminAuthMiddleware } from '../accessories/AuthMiddleware.accessory';
 import { ApiController } from '../accessories/Controller.accessory';

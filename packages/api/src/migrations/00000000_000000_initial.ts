@@ -1,6 +1,6 @@
-import { DB } from '../database';
+import { Db } from '../database';
 
-export default async function (db: DB) {
+export default async function (db: Db) {
     await db.rawQuery(`
         CREATE TABLE \`apps\` (
         \`id\` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',

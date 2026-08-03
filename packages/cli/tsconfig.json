@@ -15,7 +15,12 @@
         "skipLibCheck": true,
         "incremental": false,
         "forceConsistentCasingInFileNames": true,
-        "isolatedModules": true
+        "isolatedModules": true,
+        "plugins": [
+            {
+                "transform": "@zyno-io/ts-server-foundation/type-compiler"
+            }
+        ]
     },
     "include": ["src/**/*"],
     "reflection": true

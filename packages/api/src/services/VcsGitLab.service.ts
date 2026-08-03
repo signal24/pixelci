@@ -1,7 +1,7 @@
-import { HttpBadRequestError } from '@deepkit/http';
-import { Logger, ScopedLogger } from '@deepkit/logger';
-import { assert } from '@deepkit/type';
-import { JWT, r } from '@zyno-io/dk-server-foundation';
+import { HttpBadRequestError } from '@zyno-io/ts-server-foundation';
+import { Logger, ScopedLogger } from '@zyno-io/ts-server-foundation';
+import { assert } from '@zyno-io/ts-server-foundation';
+import { JWT, r } from '@zyno-io/ts-server-foundation';
 import axios from 'axios';
 
 import type { IVcsLoginSessionResponse, IVcsProject, IVcsServiceImpl } from './Vcs.service';

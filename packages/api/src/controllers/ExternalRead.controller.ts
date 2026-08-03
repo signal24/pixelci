@@ -1,5 +1,5 @@
-import { http, HttpNotFoundError, HttpQueries, HttpRequest, HttpUnauthorizedError, Redirect } from '@deepkit/http';
-import { AnyResponse } from '@zyno-io/dk-server-foundation';
+import { http, HttpNotFoundError, HttpQueries, HttpRequest, HttpUnauthorizedError, Redirect } from '@zyno-io/ts-server-foundation';
+import { AnyResponse } from '@zyno-io/ts-server-foundation';
 import { keyBy, uniq } from 'lodash';
 
 import { getVcsAuthContext, VcsTokenAuthMiddleware } from '../accessories/AuthMiddleware.accessory';

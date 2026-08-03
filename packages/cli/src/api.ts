@@ -1,4 +1,4 @@
-import { assert, ReceiveType } from '@deepkit/type';
+import { assert, ReceiveType } from '@zyno-io/ts-server-foundation';
 import { openAsBlob } from 'fs';
 
 import { ICIJobInfo } from './ci.js';

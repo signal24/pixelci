@@ -10,24 +10,23 @@
     "main": "./dist/index.js",
     "scripts": {
         "clean": "rm -rf dist",
-        "dev": "APP_ENV=${APP_ENV:-development} npm-run-all clean -p dev:tsc dev:run",
-        "dev:tsc": "tsc -w --preserveWatchOutput -p tsconfig.json",
+        "dev": "APP_ENV=${APP_ENV:-development} npm-run-all clean -p dev:ttsc dev:run",
         "dev:run": "sh -c 'while ! [ -f dist/index.js ]; do sleep 1; done; dotenv yarn start:debug ../api/tests/integration/fixtures'",
         "start": "node dist/index.js",
         "start:debug": "node --inspect=9210 --watch dist/index.js",
-        "test": "tsc && node --experimental-test-module-mocks --test dist/*.spec.js",
-        "format": "npx oxlint --fix --fix-suggestions --fix-dangerously && oxfmt"
+        "test": "ttsc && node --experimental-test-module-mocks --test dist/*.spec.js",
+        "format": "npx oxlint --fix --fix-suggestions --fix-dangerously && oxfmt",
+        "dev:ttsc": "ttsc -w --preserveWatchOutput -p tsconfig.json"
     },
     "dependencies": {
-        "@deepkit/core": "^1.0.19",
-        "@deepkit/type": "^1.0.19",
-        "@deepkit/type-compiler": "^1.0.19"
+        "@zyno-io/ts-server-foundation": "^26.802.1718"
     },
     "devDependencies": {
-        "@faker-js/faker": "^10.4.0",
-        "@types/node": "^25.9.3",
+        "@faker-js/faker": "^10.5.0",
+        "@types/node": "^26.1.2",
         "dotenv-cli": "^11.0.0",
         "npm-run-all": "^4.1.5",
-        "typescript": "~6.0"
+        "ttsc": "0.23.0",
+        "typescript": "~7.0.2"
     }
 }

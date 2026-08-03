@@ -1,5 +1,5 @@
-import { HttpNotFoundError } from '@deepkit/http';
-import { HttpDetailedAccessDeniedError } from '@zyno-io/dk-server-foundation';
+import { HttpNotFoundError } from '@zyno-io/ts-server-foundation';
+import { HttpAccessDeniedError } from '@zyno-io/ts-server-foundation';
 import { createHash } from 'crypto';
 
 import { AppConfig } from '../config';
@@ -61,7 +61,7 @@ export class AppAccessService {
 
     async assertCanAccess(principal: IAppAccessPrincipal, app: AppEntity): Promise<void> {
         if (!(await this.canAccess(principal, app))) {
-            throw new HttpDetailedAccessDeniedError('You do not have access to this project in the VCS provider');
+            throw new HttpAccessDeniedError('You do not have access to this project in the VCS provider');
         }
     }
 

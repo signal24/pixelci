@@ -1,6 +1,6 @@
-import { DB } from '../database';
+import { Db } from '../database';
 
-export default async function (db: DB) {
+export default async function (db: Db) {
     await db.rawExecute(`
         ALTER TABLE builds ADD COLUMN ciTokenHash VARCHAR(64) NULL;
     `);

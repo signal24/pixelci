@@ -1,4 +1,4 @@
-import { http } from '@deepkit/http';
+import { http } from '@zyno-io/ts-server-foundation';
 
 import { UserAuthMiddleware } from '../accessories/AuthMiddleware.accessory';
 import { ApiController } from '../accessories/Controller.accessory';

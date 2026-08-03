@@ -1,6 +1,4 @@
-import { http, HttpBadRequestError, HttpBody, HttpNotFoundError, HttpQueries } from '@deepkit/http';
-import { uuid } from '@deepkit/type';
-import { createEntity, EntityFields } from '@zyno-io/dk-server-foundation';
+import { createEntity, EntityFields, http, HttpBadRequestError, HttpBody, HttpNotFoundError, HttpQueries, uuid } from '@zyno-io/ts-server-foundation';
 
 import { AdminAuthMiddleware, UserAuthMiddleware } from '../accessories/AuthMiddleware.accessory';
 import { ApiController } from '../accessories/Controller.accessory';

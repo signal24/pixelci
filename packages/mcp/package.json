@@ -9,14 +9,16 @@
     "main": "./dist/index.js",
     "scripts": {
         "clean": "rm -rf dist",
-        "build": "tsc -p tsconfig.json",
+        "build": "ttsc -p tsconfig.json",
         "start": "node dist/index.js",
         "format": "npx oxlint --fix --fix-suggestions --fix-dangerously && oxfmt"
     },
     "dependencies": {
-        "@modelcontextprotocol/sdk": "^1.29.0"
+        "@modelcontextprotocol/sdk": "^1.30.0"
     },
     "devDependencies": {
-        "typescript": "^5.6.0"
+        "@types/node": "^26.1.2",
+        "ttsc": "0.23.0",
+        "typescript": "~7.0.2"
     }
 }

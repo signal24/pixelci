@@ -186,9 +186,9 @@ GitLab CI stages (`.gitlab-ci.yml`):
 
 ## Important Patterns
 
-### Deepkit Framework
+### TS Server Foundation
 
-- Uses runtime type information via `@deepkit/type-compiler`
+- Uses runtime type information via `@zyno-io/ts-server-foundation` and `ttsc`
 - Dependency injection throughout
 - Database entities use decorators: `@entity.name()`, `& PrimaryKey`
 - Controllers use `@http.GET()`, `@http.POST()` decorators

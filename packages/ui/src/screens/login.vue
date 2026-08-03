@@ -91,7 +91,7 @@ async function loadSession() {
         }
         return;
     } catch (err) {
-        if (!(err instanceof OpenApiError && err.response.status === 401)) {
+        if (!(err instanceof OpenApiError && err.response?.status === 401)) {
             return handleErrorAndAlert(err);
         }
     }

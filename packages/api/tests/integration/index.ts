@@ -1,6 +1,6 @@
-import { HttpRequest, RequestBuilder } from '@deepkit/http';
-import { assert, ReceiveType } from '@deepkit/type';
-import { createPersistedEntity, JWT, sleepSecs, TestingFacade, TestingHelpers } from '@zyno-io/dk-server-foundation';
+import { HttpRequest, RequestBuilder } from '@zyno-io/ts-server-foundation';
+import { assert, ReceiveType } from '@zyno-io/ts-server-foundation';
+import { createPersistedEntity, JWT, sleepSecs, TestingFacade, TestingHelpers } from '@zyno-io/ts-server-foundation';
 import { readFileSync } from 'fs';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
 

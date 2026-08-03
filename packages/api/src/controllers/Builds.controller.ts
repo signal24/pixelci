@@ -1,12 +1,12 @@
-import { http, HttpBadRequestError, HttpNotFoundError, HttpQueries, HttpRequest, HttpUnauthorizedError } from '@deepkit/http';
-import { ScopedLogger } from '@deepkit/logger';
-import { createPersistedEntity, OkResponse, uuid7, WorkerService } from '@zyno-io/dk-server-foundation';
+import { http, HttpBadRequestError, HttpNotFoundError, HttpQueries, HttpRequest, HttpUnauthorizedError } from '@zyno-io/ts-server-foundation';
+import { ScopedLogger } from '@zyno-io/ts-server-foundation';
+import { createPersistedEntity, OkResponse, uuid7, WorkerService } from '@zyno-io/ts-server-foundation';
 import axios from 'axios';
 import { keyBy, uniq } from 'lodash';
 
 import { BuildCiTokenMiddleware, hashCiToken, UserAuthMiddleware, validateCiToken } from '../accessories/AuthMiddleware.accessory';
 import { ApiController } from '../accessories/Controller.accessory';
-import { DB } from '../database';
+import { Db } from '../database';
 import { AppEntity } from '../entities/App.entity';
 import { BranchEntity } from '../entities/Branch.entity';
 import { BuildEntity } from '../entities/Build.entity';
@@ -29,7 +29,7 @@ export class BuildsController {
     constructor(
         private workerSvc: WorkerService,
         private vcsSvc: VcsService,
-        private db: DB,
+        private db: Db,
         private logger: ScopedLogger,
         private appAccessSvc: AppAccessService
     ) {}
