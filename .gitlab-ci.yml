@@ -134,7 +134,9 @@ visual regression test (deferred):
 
 .build-base:
   stage: build
-  dependencies: []
+  # must include "prepare build" so its dotenv (BUILD_VERSION) is fetched
+  dependencies:
+    - prepare build
   image: ghcr.io/zyno-io/container-tooling:latest
   before_script:
     - |
