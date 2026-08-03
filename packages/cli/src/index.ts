@@ -3,7 +3,7 @@ import { existsSync } from 'fs';
 import { getApi } from './api.js';
 import { getJobInfo } from './ci.js';
 import { AppError, handleError } from './error.js';
-import { getImages } from './glob.js';
+import { getImages, getScreenName } from './glob.js';
 
 process.on('unhandledRejection', handleError);
 process.on('uncaughtException', handleError);
@@ -29,10 +29,7 @@ if (buildStatus === 'draft') {
     console.log(`Build ${buildId} created.`);
 
     for (const imageFile of imageFiles) {
-        const screenName = imageFile
-            .substring(sourcePath.length + 1)
-            .replace(/\\/g, ' - ')
-            .replace(/\.png$/i, '');
+        const screenName = getScreenName(sourcePath, imageFile);
         console.log(`\nUploading screen "${screenName}"...`);
         await api.uploadScreen(buildId, imageFile, screenName);
         console.log(`Screen "${screenName}" uploaded.`);
