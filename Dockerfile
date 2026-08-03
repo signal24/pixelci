@@ -1,4 +1,4 @@
-FROM node:24-alpine AS builder
+FROM node:24-bookworm-slim AS builder
 
 WORKDIR /app
 
@@ -27,12 +27,14 @@ RUN yarn workspaces focus @zyno-io/pixelci-api --production
 
 ###
 
-FROM node:24-alpine
+FROM node:24-bookworm-slim
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-RUN apk add --no-cache tini
+RUN apt-get update && \
+    apt-get install --no-install-recommends --yes tini && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/packages/api .
 COPY --from=builder /app/node_modules node_modules
@@ -41,5 +43,5 @@ COPY LICENSE.md THIRD-PARTY-LICENSES.md ./
 ARG BUILD_VERSION=0.0.0
 RUN npm version ${BUILD_VERSION} --allow-same-version
 
-ENTRYPOINT ["/sbin/tini", "--"]
+ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD [ "node", ".", "server:start" ]
