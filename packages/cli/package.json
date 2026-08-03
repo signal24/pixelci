@@ -19,7 +19,7 @@
         "dev:ttsc": "ttsc -w --preserveWatchOutput -p tsconfig.json"
     },
     "dependencies": {
-        "@zyno-io/ts-server-foundation": "^26.802.1718"
+        "@zyno-io/ts-reflection": "^26.803.2224"
     },
     "devDependencies": {
         "@faker-js/faker": "^10.5.0",

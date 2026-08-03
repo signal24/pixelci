@@ -1,4 +1,4 @@
-import { assert, ReceiveType } from '@zyno-io/ts-server-foundation';
+import { assert, type ReceiveType } from '@zyno-io/ts-reflection';
 import { openAsBlob } from 'fs';
 
 import { ICIJobInfo } from './ci.js';

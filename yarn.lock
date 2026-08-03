@@ -3825,7 +3825,8 @@ __metadata:
     "@types/mime-types": "npm:^3.0.1"
     "@types/node": "npm:^26.1.2"
     "@types/pngjs": "npm:^6.0.5"
-    "@zyno-io/ts-server-foundation": "npm:^26.802.1718"
+    "@zyno-io/ts-reflection": "npm:^26.803.2224"
+    "@zyno-io/ts-server-foundation": "npm:^26.803.2224"
     axios: "npm:^1.19.0"
     date-fns: "npm:^4.4.0"
     date-fns-tz: "npm:^3.2.0"
@@ -3844,7 +3845,7 @@ __metadata:
   dependencies:
     "@faker-js/faker": "npm:^10.5.0"
     "@types/node": "npm:^26.1.2"
-    "@zyno-io/ts-server-foundation": "npm:^26.802.1718"
+    "@zyno-io/ts-reflection": "npm:^26.803.2224"
     dotenv-cli: "npm:^11.0.0"
     npm-run-all: "npm:^4.1.5"
     ttsc: "npm:0.23.0"
@@ -3908,9 +3909,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@zyno-io/ts-server-foundation@npm:^26.802.1718":
-  version: 26.802.1718
-  resolution: "@zyno-io/ts-server-foundation@npm:26.802.1718"
+"@zyno-io/ts-reflection@npm:26.803.2224, @zyno-io/ts-reflection@npm:^26.803.2224":
+  version: 26.803.2224
+  resolution: "@zyno-io/ts-reflection@npm:26.803.2224"
+  peerDependencies:
+    ttsc: ^0.23.0
+  peerDependenciesMeta:
+    ttsc:
+      optional: true
+  checksum: 10c0/4dd8c348a65d65c62c55338637ef931947c58ce04b123c1af1553591c41dcebe3ef28e790f626a806f8245f5a9c51cd99193268b0052207ac36567f5fc19b101
+  languageName: node
+  linkType: hard
+
+"@zyno-io/ts-server-foundation@npm:^26.803.2224":
+  version: 26.803.2224
+  resolution: "@zyno-io/ts-server-foundation@npm:26.803.2224"
   dependencies:
     "@bufbuild/protobuf": "npm:^2.13.0"
     "@opentelemetry/api": "npm:^1.9.1"
@@ -3933,6 +3946,7 @@ __metadata:
     "@ttsc/graph": "npm:^0.23.0"
     "@types/ws": "npm:^8.18.1"
     "@zyno-io/config": "npm:^1.14.0"
+    "@zyno-io/ts-reflection": "npm:26.803.2224"
     bcrypt: "npm:^6.0.0"
     bullmq: "npm:^5.81.2"
     busboy: "npm:^1.6.0"
@@ -3987,7 +4001,7 @@ __metadata:
     tsf-repl: dist/src/cli/tsf-repl.js
     tsf-test: dist/src/cli/tsf-test.js
     tsf-update: dist/src/cli/tsf-update.js
-  checksum: 10c0/64c686e94f061b14d14ec9a977f9c9493eb217b66a48961ac9040b82838f8decd16d831146e90d3eef162162f8e32debf5e9469702af9354501cc3a31b780257
+  checksum: 10c0/b90ccd5adbed44a5be3af8c675ec2d0444aaa0ed3dcfb29fef289ab9d01fc1c83a9d8d2145d4f5d0913d67cb51cbcc6266f4cc84b96863de822b908c51e616d7
   languageName: node
   linkType: hard
 

@@ -14,7 +14,7 @@ RUN yarn workspaces focus @zyno-io/pixelci-cli
 COPY packages/cli packages/cli
 
 RUN cd packages/cli && \
-    npx tsc
+    npx ttsc
 
 FROM node:24-alpine
 WORKDIR /app
