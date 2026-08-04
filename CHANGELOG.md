@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.3.0
+
+- Per-screen build review, with bulk approve and explicit build rejection
+- Read access for LLMs/MCP via GitLab PAT, gated on project access
+- Zoom for screens, including the diff overlay, with centring fixes
+- Apps list search and screen review UX improvements
+- **Fixed screen names being truncated on upload.** The CLI derived a name by trimming
+  `sourcePath.length` off the front of each path, but `fs.glob` returns a _normalized_ path
+  — so invoking with `./screenshots` silently ate the first two characters of every screen
+  name, and a trailing slash ate one. Names are the screen identity (`{ appId, name }`), so
+  this attached review history to the wrong record. Now derived with `path.relative`.
+- Fixed new-build images being sized inconsistently with the reference build, and
+  overscaled images
+
 ## v0.2.0
 
 - Light/dark mode toggle
